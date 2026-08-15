@@ -19,6 +19,8 @@ const user = usePage().props.auth.user;
 const form = useForm({
     name: user.name,
     email: user.email,
+    crfa: user.crfa ?? '',
+    especialidade: user.especialidade ?? '',
 });
 </script>
 
@@ -26,11 +28,11 @@ const form = useForm({
     <section>
         <header>
             <h2 class="text-lg font-medium text-gray-900">
-                Profile Information
+                Informações do Perfil
             </h2>
 
             <p class="mt-1 text-sm text-gray-600">
-                Update your account's profile information and email address.
+                Atualize seus dados cadastrais, registro profissional e endereço de e-mail.
             </p>
         </header>
 
@@ -39,7 +41,7 @@ const form = useForm({
             class="mt-6 space-y-6"
         >
             <div>
-                <InputLabel for="name" value="Name" />
+                <InputLabel for="name" value="Nome Completo" />
 
                 <TextInput
                     id="name"
@@ -69,16 +71,44 @@ const form = useForm({
                 <InputError class="mt-2" :message="form.errors.email" />
             </div>
 
+            <div>
+                <InputLabel for="crfa" value="CRFa (Registro Profissional)" />
+
+                <TextInput
+                    id="crfa"
+                    type="text"
+                    class="mt-1 block w-full"
+                    v-model="form.crfa"
+                    placeholder="Ex: CRFa 7-12345"
+                />
+
+                <InputError class="mt-2" :message="form.errors.crfa" />
+            </div>
+
+            <div>
+                <InputLabel for="especialidade" value="Especialidade" />
+
+                <TextInput
+                    id="especialidade"
+                    type="text"
+                    class="mt-1 block w-full"
+                    v-model="form.especialidade"
+                    placeholder="Ex: Linguagem, Voz, Motricidade Orofacial"
+                />
+
+                <InputError class="mt-2" :message="form.errors.especialidade" />
+            </div>
+
             <div v-if="mustVerifyEmail && user.email_verified_at === null">
                 <p class="mt-2 text-sm text-gray-800">
-                    Your email address is unverified.
+                    Seu endereço de e-mail não foi verificado.
                     <Link
                         :href="route('verification.send')"
                         method="post"
                         as="button"
-                        class="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                        class="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                     >
-                        Click here to re-send the verification email.
+                        Clique aqui para reenviar o e-mail de verificação.
                     </Link>
                 </p>
 
@@ -86,12 +116,12 @@ const form = useForm({
                     v-show="status === 'verification-link-sent'"
                     class="mt-2 text-sm font-medium text-green-600"
                 >
-                    A new verification link has been sent to your email address.
+                    Um novo link de verificação foi enviado para o seu endereço de e-mail.
                 </div>
             </div>
 
             <div class="flex items-center gap-4">
-                <PrimaryButton :disabled="form.processing">Save</PrimaryButton>
+                <PrimaryButton :disabled="form.processing">Salvar</PrimaryButton>
 
                 <Transition
                     enter-active-class="transition ease-in-out"
@@ -103,7 +133,7 @@ const form = useForm({
                         v-if="form.recentlySuccessful"
                         class="text-sm text-gray-600"
                     >
-                        Saved.
+                        Salvo com sucesso.
                     </p>
                 </Transition>
             </div>
