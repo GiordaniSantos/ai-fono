@@ -1,6 +1,7 @@
 <script setup>
-import { ref } from 'vue';
-import { Link } from '@inertiajs/vue3';
+import { ref, watch, onMounted } from 'vue';
+import { usePage, Link } from '@inertiajs/vue3';
+import { Toast } from '@/Utils/alert';
 import {
     Dialog,
     DialogPanel,
@@ -18,12 +19,47 @@ import {
     UserIcon,
     ArrowRightOnRectangleIcon,
     ChevronDownIcon,
+    UserGroupIcon,
 } from '@heroicons/vue/24/outline';
+
+const page = usePage();
+
+const triggerFlashMessage = () => {
+    const flash = page.props.flash;
+    if (!flash) return;
+
+    if (flash.success) {
+        Toast.fire({
+            icon: 'success',
+            title: flash.success,
+        });
+    }
+
+    if (flash.error) {
+        Toast.fire({
+            icon: 'error',
+            title: flash.error,
+        });
+    }
+};
+
+onMounted(() => {
+    triggerFlashMessage();
+});
+
+watch(
+    () => page.props.flash,
+    () => {
+        triggerFlashMessage();
+    },
+    { deep: true }
+);
 
 const sidebarOpen = ref(false);
 
 const navigation = [
     { name: 'Dashboard', href: route('dashboard'), icon: HomeIcon, current: route().current('dashboard') },
+    { name: 'Pacientes', href: route('pacientes.index'), icon: UserGroupIcon, current: route().current('pacientes.*') },
 ];
 </script>
 
