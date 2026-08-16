@@ -148,7 +148,7 @@ const navigation = [
                                         :href="item.href"
                                         :class="[
                                             item.current
-                                                ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
+                                                ? 'bg-sky-500 text-white shadow-lg shadow-sky-500/30'
                                                 : 'text-white/70 hover:bg-white/5 hover:text-white',
                                             'group flex gap-x-3 rounded-xl p-2.5 text-sm font-semibold leading-6 transition duration-150',
                                         ]"

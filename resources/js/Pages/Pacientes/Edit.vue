@@ -236,7 +236,7 @@ const submit = () => {
                             Cancelar
                         </Link>
                         <PrimaryButton
-                            class="!rounded-xl !bg-blue-600 !px-6 !py-2.5 !font-semibold hover:!bg-blue-700"
+                            class="!rounded-xl !bg-green-500 !px-6 !py-2.5 !font-semibold hover:!bg-green-700"
                             :class="{ 'opacity-25': form.processing }"
                             :disabled="form.processing"
                         >
