@@ -19,7 +19,7 @@ class PacienteController extends Controller
     public function index(): Response
     {
         $pacientes = $this->pacienteService->getAllByFonoaudiologo(Auth::id());
-
+        
         return Inertia::render('Pacientes/Index', [
             'pacientes' => $pacientes,
         ]);

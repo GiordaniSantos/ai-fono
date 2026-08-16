@@ -1,11 +1,19 @@
 <script setup>
+import { ref } from 'vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import { ArrowLeftIcon, KeyIcon } from '@heroicons/vue/24/outline';
+import {
+    ArrowLeftIcon,
+    KeyIcon,
+    PhotoIcon,
+    ArrowTopRightOnSquareIcon,
+    TrashIcon,
+    ArrowPathIcon,
+} from '@heroicons/vue/24/outline';
 import { maskPhone } from '@/Utils/mask';
 
 const props = defineProps({
@@ -15,16 +23,40 @@ const props = defineProps({
     },
 });
 
+const fileInput = ref(null);
+const previewUrl = ref(props.paciente.anexo_url || null);
+
 const form = useForm({
+    _method: 'PATCH',
     nome: props.paciente.nome,
     data_nascimento: props.paciente.data_nascimento ? props.paciente.data_nascimento.substring(0, 10) : '',
     email: props.paciente.email ?? '',
     telefone: maskPhone(props.paciente.telefone ?? ''),
     diagnostico: props.paciente.diagnostico ?? '',
+    anexo: null,
+    remover_anexo: false,
 });
 
+const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+        form.anexo = file;
+        form.remover_anexo = false;
+        previewUrl.value = URL.createObjectURL(file);
+    }
+};
+
+const removeFile = () => {
+    form.anexo = null;
+    form.remover_anexo = true;
+    previewUrl.value = null;
+    if (fileInput.value) fileInput.value.value = '';
+};
+
 const submit = () => {
-    form.patch(route('pacientes.update', props.paciente.id));
+    form.post(route('pacientes.update', props.paciente.id), {
+        preserveScroll: true,
+    });
 };
 </script>
 
@@ -73,6 +105,7 @@ const submit = () => {
                         />
                         <InputError class="mt-2" :message="form.errors.nome" />
                     </div>
+
                     <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
                         <div>
                             <InputLabel for="data_nascimento" value="Data de Nascimento *" />
@@ -93,6 +126,8 @@ const submit = () => {
                                 type="text"
                                 class="mt-1 block w-full rounded-xl"
                                 v-model="form.telefone"
+                                @input="form.telefone = maskPhone($event.target.value)"
+                                maxlength="15"
                             />
                             <InputError class="mt-2" :message="form.errors.telefone" />
                         </div>
@@ -118,6 +153,79 @@ const submit = () => {
                             v-model="form.diagnostico"
                         ></textarea>
                         <InputError class="mt-2" :message="form.errors.diagnostico" />
+                    </div>
+
+                    <div class="space-y-3">
+                        <InputLabel value="Anexo / Imagem do Diagnóstico (Exame, Audiometria, Laudo)" />
+
+                        <input
+                            ref="fileInput"
+                            type="file"
+                            accept="image/*"
+                            class="hidden"
+                            @change="handleFileChange"
+                        />
+
+                        <div
+                            v-if="!previewUrl"
+                            @click="fileInput.click()"
+                            class="flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-gray-300 p-6 transition hover:border-blue-500 hover:bg-blue-50/30"
+                        >
+                            <PhotoIcon class="h-10 w-10 text-gray-400" />
+                            <span class="mt-2 text-sm font-semibold text-gray-700">Clique para selecionar uma imagem</span>
+                            <span class="text-xs text-gray-500">PNG, JPG ou WEBP até 4MB</span>
+                        </div>
+
+                        <div
+                            v-else
+                            class="overflow-hidden rounded-2xl border border-gray-200 bg-gray-50 p-4"
+                        >
+                            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                                <div class="flex items-center gap-4">
+                                    <img
+                                        :src="previewUrl"
+                                        alt="Imagem do diagnóstico"
+                                        class="h-28 w-28 rounded-xl border border-gray-300 bg-white object-cover shadow-sm"
+                                    />
+                                    <div>
+                                        <h4 class="text-sm font-semibold text-gray-900">Imagem do Diagnóstico</h4>
+                                        <p class="text-xs text-gray-500">Arquivo anexado ao prontuário do paciente</p>
+
+                                        <div class="mt-3 flex items-center gap-3">
+                                            <a
+                                                :href="previewUrl"
+                                                target="_blank"
+                                                class="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-700 hover:underline"
+                                            >
+                                                <ArrowTopRightOnSquareIcon class="h-4 w-4" />
+                                                Abrir em tamanho real
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center gap-2 border-t border-gray-200 pt-3 sm:border-0 sm:pt-0">
+                                    <button
+                                        type="button"
+                                        @click="fileInput.click()"
+                                        class="inline-flex items-center gap-1.5 rounded-xl border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 shadow-sm hover:bg-gray-100 transition"
+                                    >
+                                        <ArrowPathIcon class="h-4 w-4 text-gray-500" />
+                                        Substituir
+                                    </button>
+                                    <button
+                                        type="button"
+                                        @click="removeFile"
+                                        class="inline-flex items-center gap-1.5 rounded-xl border border-red-200 bg-white px-3 py-1.5 text-xs font-semibold text-red-600 shadow-sm hover:bg-red-50 transition"
+                                    >
+                                        <TrashIcon class="h-4 w-4 text-red-500" />
+                                        Remover
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <InputError class="mt-2" :message="form.errors.anexo" />
                     </div>
 
                     <div class="flex items-center justify-end gap-3 border-t border-gray-100 pt-6">

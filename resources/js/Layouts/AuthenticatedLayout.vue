@@ -177,9 +177,22 @@ const navigation = [
                 <div class="flex flex-1 justify-end gap-x-4 self-stretch lg:gap-x-6">
                     <div class="flex items-center gap-x-4 lg:gap-x-6">
                         <Menu as="div" class="relative">
-                            <MenuButton class="-m-1.5 flex items-center rounded-full p-1.5 text-gray-700 hover:text-gray-900 focus:outline-none">
+                            <MenuButton class="-m-1.5 flex items-center gap-3 rounded-full p-1.5 text-gray-700 hover:text-gray-900 focus:outline-none">
+                                <img
+                                    v-if="$page.props.auth.user.foto_url"
+                                    :src="$page.props.auth.user.foto_url"
+                                    alt="Avatar"
+                                    class="h-8 w-8 rounded-full object-cover ring-1 ring-gray-200"
+                                />
+                                <div
+                                    v-else
+                                    class="flex h-8 w-8 items-center justify-center rounded-full bg-blue-50 font-bold text-xs text-blue-600 ring-1 ring-blue-200"
+                                >
+                                    {{ $page.props.auth.user.name.charAt(0).toUpperCase() }}
+                                </div>
+
                                 <span class="text-sm font-medium leading-6">{{ $page.props.auth.user.name }}</span>
-                                <ChevronDownIcon class="ml-2 h-4 w-4 text-gray-400" aria-hidden="true" />
+                                <ChevronDownIcon class="h-4 w-4 text-gray-400" aria-hidden="true" />
                             </MenuButton>
 
                             <transition

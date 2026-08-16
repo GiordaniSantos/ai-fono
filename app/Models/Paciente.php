@@ -3,11 +3,10 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
 
-class Paciente extends Model
+class Paciente extends AbstractBaseModel
 {
     use HasFactory;
 
@@ -23,6 +22,10 @@ class Paciente extends Model
 
     protected $casts = [
         'data_nascimento' => 'date',
+    ];
+
+    protected $appends = [
+        'anexo_url',
     ];
 
     protected static function booted(): void
@@ -47,4 +50,16 @@ class Paciente extends Model
     {
         return $this->belongsTo(Fonoaudiologo::class);
     }
+
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection(self::COLLECTION_ANEXO)->singleFile();
+    }
+
+    public function getAnexoUrlAttribute(): ?string
+    {
+        $media = $this->getFirstMedia(self::COLLECTION_ANEXO);
+        return $media ? $media->getUrl() : null;
+    }
+
 }

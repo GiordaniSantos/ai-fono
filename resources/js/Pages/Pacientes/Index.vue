@@ -1,8 +1,15 @@
 <script setup>
+import { ref, computed } from 'vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
-import { ref, computed } from 'vue';
 import { confirmAction } from '@/Utils/alert';
+import { maskPhone } from '@/Utils/mask';
+import {
+    Dialog,
+    DialogPanel,
+    TransitionChild,
+    TransitionRoot,
+} from '@headlessui/vue';
 import {
     PlusIcon,
     PencilSquareIcon,
@@ -11,6 +18,9 @@ import {
     ClipboardDocumentIcon,
     MagnifyingGlassIcon,
     UserIcon,
+    PhotoIcon,
+    XMarkIcon,
+    ArrowTopRightOnSquareIcon,
 } from '@heroicons/vue/24/outline';
 
 const props = defineProps({
@@ -22,6 +32,7 @@ const props = defineProps({
 
 const search = ref('');
 const copiedId = ref(null);
+const activeModalImage = ref(null);
 
 const filteredPacientes = computed(() => {
     if (!search.value) return props.pacientes;
@@ -56,9 +67,7 @@ const deletePaciente = async (paciente) => {
 
 const formatDate = (dateString) => {
     if (!dateString) return '-';
-    
     const [year, month, day] = dateString.split('T')[0].split('-');
-    
     return `${day}/${month}/${year}`;
 };
 </script>
@@ -97,6 +106,7 @@ const formatDate = (dateString) => {
                 />
             </div>
 
+            <!-- Tabela -->
             <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
                 <div v-if="filteredPacientes.length === 0" class="py-12 text-center">
                     <UserIcon class="mx-auto h-12 w-12 text-gray-300" />
@@ -109,6 +119,7 @@ const formatDate = (dateString) => {
                         <thead class="bg-gray-50 text-xs font-semibold uppercase tracking-wider text-gray-500">
                             <tr>
                                 <th class="px-6 py-4">Paciente</th>
+                                <th class="px-6 py-4">Anexo / Exame</th>
                                 <th class="px-6 py-4">Nascimento</th>
                                 <th class="px-6 py-4">Contato</th>
                                 <th class="px-6 py-4">Código de Acesso</th>
@@ -121,13 +132,33 @@ const formatDate = (dateString) => {
                                     <div class="font-medium text-gray-900">{{ paciente.nome }}</div>
                                     <div class="text-xs text-gray-500 truncate max-w-xs">{{ paciente.diagnostico || 'Sem diagnóstico informado' }}</div>
                                 </td>
+
+                                <td class="px-6 py-4">
+                                    <button
+                                        v-if="paciente.anexo_url"
+                                        type="button"
+                                        @click="activeModalImage = paciente.anexo_url"
+                                        class="group relative block h-10 w-10 overflow-hidden rounded-lg border border-gray-200 bg-gray-100 shadow-sm"
+                                        title="Clique para ampliar o laudo"
+                                    >
+                                        <img
+                                            :src="paciente.anexo_url"
+                                            alt="Laudo"
+                                            class="h-full w-full object-cover transition group-hover:scale-110"
+                                        />
+                                    </button>
+                                    <span v-else class="text-xs text-gray-400 italic">Sem anexo</span>
+                                </td>
+
                                 <td class="px-6 py-4 text-gray-600">
                                     {{ formatDate(paciente.data_nascimento) }}
                                 </td>
+
                                 <td class="px-6 py-4">
-                                    <div class="text-gray-900">{{ paciente.telefone || '-' }}</div>
+                                    <div class="text-gray-900">{{ maskPhone(paciente.telefone) || '-' }}</div>
                                     <div class="text-xs text-gray-500">{{ paciente.email || '-' }}</div>
                                 </td>
+
                                 <td class="px-6 py-4">
                                     <button
                                         @click="copyCode(paciente.codigo_acesso, paciente.id)"
@@ -140,6 +171,7 @@ const formatDate = (dateString) => {
                                         <ClipboardDocumentIcon v-else class="h-4 w-4 text-blue-500" />
                                     </button>
                                 </td>
+
                                 <td class="px-6 py-4 text-right">
                                     <div class="flex items-center justify-end gap-2">
                                         <Link
@@ -165,5 +197,63 @@ const formatDate = (dateString) => {
                 </div>
             </div>
         </div>
+
+        <TransitionRoot as="template" :show="!!activeModalImage">
+            <Dialog as="div" class="relative z-50" @close="activeModalImage = null">
+                <TransitionChild
+                    as="template"
+                    enter="ease-out duration-300"
+                    enter-from="opacity-0"
+                    enter-to="opacity-100"
+                    leave="ease-in duration-200"
+                    leave-from="opacity-100"
+                    leave-to="opacity-0"
+                >
+                    <div class="fixed inset-0 bg-black/80 backdrop-blur-sm transition-opacity" />
+                </TransitionChild>
+
+                <div class="fixed inset-0 z-10 overflow-y-auto p-4 sm:p-6 md:p-20">
+                    <TransitionChild
+                        as="template"
+                        enter="ease-out duration-300"
+                        enter-from="opacity-0 scale-95"
+                        enter-to="opacity-100 scale-100"
+                        leave="ease-in duration-200"
+                        leave-from="opacity-100 scale-100"
+                        leave-to="opacity-0 scale-95"
+                    >
+                        <DialogPanel class="relative mx-auto max-w-3xl overflow-hidden rounded-2xl bg-white p-4 shadow-2xl">
+                            <div class="flex items-center justify-between border-b border-gray-100 pb-3">
+                                <h3 class="text-base font-semibold text-gray-900">Imagem do Diagnóstico / Exame</h3>
+                                <div class="flex items-center gap-3">
+                                    <a
+                                        :href="activeModalImage"
+                                        target="_blank"
+                                        class="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:underline"
+                                    >
+                                        <ArrowTopRightOnSquareIcon class="h-4 w-4" />
+                                        Abrir original
+                                    </a>
+                                    <button
+                                        type="button"
+                                        class="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+                                        @click="activeModalImage = null"
+                                    >
+                                        <XMarkIcon class="h-5 w-5" />
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="mt-4 flex items-center justify-center bg-gray-900 rounded-xl overflow-hidden p-2">
+                                <img
+                                    :src="activeModalImage"
+                                    alt="Laudo Ampliado"
+                                    class="max-h-[70vh] w-auto object-contain rounded-lg"
+                                />
+                            </div>
+                        </DialogPanel>
+                    </TransitionChild>
+                </div>
+            </Dialog>
+        </TransitionRoot>
     </AuthenticatedLayout>
 </template>

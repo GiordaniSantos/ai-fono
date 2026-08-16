@@ -1,12 +1,16 @@
 <script setup>
+import { ref } from 'vue';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import { ArrowLeftIcon } from '@heroicons/vue/24/outline';
+import { ArrowLeftIcon, PhotoIcon, XMarkIcon } from '@heroicons/vue/24/outline';
 import { maskPhone } from '@/Utils/mask';
+
+const photoInput = ref(null);
+const previewUrl = ref(null);
 
 const form = useForm({
     nome: '',
@@ -14,7 +18,22 @@ const form = useForm({
     email: '',
     telefone: '',
     diagnostico: '',
+    anexo: null,
 });
+
+const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+        form.anexo = file;
+        previewUrl.value = URL.createObjectURL(file);
+    }
+};
+
+const removeFile = () => {
+    form.anexo = null;
+    previewUrl.value = null;
+    if (photoInput.value) photoInput.value.value = '';
+};
 
 const submit = () => {
     form.post(route('pacientes.store'));
@@ -37,10 +56,9 @@ const submit = () => {
             </div>
         </template>
 
-        <div class="">
+        <div>
             <div class="rounded-2xl border border-gray-200 bg-white p-6 sm:p-8 shadow-sm">
                 <form @submit.prevent="submit" class="space-y-6">
-                    <!-- Nome -->
                     <div>
                         <InputLabel for="nome" value="Nome Completo *" />
                         <TextInput
@@ -55,7 +73,6 @@ const submit = () => {
                         <InputError class="mt-2" :message="form.errors.nome" />
                     </div>
 
-                    <!-- Linha dupla: Data de Nascimento & Telefone -->
                     <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
                         <div>
                             <InputLabel for="data_nascimento" value="Data de Nascimento *" />
@@ -78,13 +95,12 @@ const submit = () => {
                                 v-model="form.telefone"
                                 @input="form.telefone = maskPhone($event.target.value)"
                                 maxlength="15"
-                                placeholder="(00) 00000-0000"
+                                placeholder="(51) 98421-9721"
                             />
                             <InputError class="mt-2" :message="form.errors.telefone" />
                         </div>
                     </div>
 
-                    <!-- Email -->
                     <div>
                         <InputLabel for="email" value="E-mail (opcional)" />
                         <TextInput
@@ -97,7 +113,6 @@ const submit = () => {
                         <InputError class="mt-2" :message="form.errors.email" />
                     </div>
 
-                    <!-- Diagnóstico / Observações -->
                     <div>
                         <InputLabel for="diagnostico" value="Diagnóstico / Queixa Principal" />
                         <textarea
@@ -110,7 +125,45 @@ const submit = () => {
                         <InputError class="mt-2" :message="form.errors.diagnostico" />
                     </div>
 
-                    <!-- Rodapé de Ações -->
+                    <div>
+                        <InputLabel value="Anexo / Imagem do Diagnóstico (Exame, Laudo, etc.)" />
+                        <input
+                            ref="photoInput"
+                            type="file"
+                            accept="image/*"
+                            class="hidden"
+                            @change="handleFileChange"
+                        />
+
+                        <div class="mt-2">
+                            <div v-if="previewUrl" class="relative inline-block">
+                                <img
+                                    :src="previewUrl"
+                                    alt="Pré-visualização"
+                                    class="h-44 w-auto rounded-xl border border-gray-200 object-cover shadow-sm"
+                                />
+                                <button
+                                    type="button"
+                                    @click="removeFile"
+                                    class="absolute -right-2 -top-2 rounded-full bg-red-600 p-1 text-white shadow-md hover:bg-red-700 transition"
+                                >
+                                    <XMarkIcon class="h-4 w-4" />
+                                </button>
+                            </div>
+
+                            <div
+                                v-else
+                                @click="photoInput.click()"
+                                class="flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-gray-300 p-6 transition hover:border-blue-500 hover:bg-blue-50/30"
+                            >
+                                <PhotoIcon class="h-10 w-10 text-gray-400" />
+                                <span class="mt-2 text-sm font-semibold text-gray-700">Clique para selecionar uma imagem</span>
+                                <span class="text-xs text-gray-500">PNG, JPG ou WEBP até 4MB</span>
+                            </div>
+                        </div>
+                        <InputError class="mt-2" :message="form.errors.anexo" />
+                    </div>
+
                     <div class="flex items-center justify-end gap-3 border-t border-gray-100 pt-6">
                         <Link
                             :href="route('pacientes.index')"
