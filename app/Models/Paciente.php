@@ -17,11 +17,13 @@ class Paciente extends AbstractBaseModel
         'telefone',
         'data_nascimento',
         'diagnostico',
+        'interesses',
         'codigo_acesso',
     ];
 
     protected $casts = [
         'data_nascimento' => 'date',
+        'interesses' => 'array'
     ];
 
     protected $appends = [

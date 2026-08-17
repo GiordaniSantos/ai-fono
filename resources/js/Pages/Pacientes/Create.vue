@@ -6,11 +6,24 @@ import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import { ArrowLeftIcon, PhotoIcon, XMarkIcon } from '@heroicons/vue/24/outline';
+import { ArrowLeftIcon, PhotoIcon, XMarkIcon, PlusIcon, SparklesIcon } from '@heroicons/vue/24/outline';
 import { maskPhone } from '@/Utils/mask';
 
 const photoInput = ref(null);
 const previewUrl = ref(null);
+const novoInteresse = ref('');
+
+const sugestoes = [
+    'Dinossauros',
+    'Super-heróis',
+    'Futebol',
+    'Minecraft / Games',
+    'Música / Canto',
+    'Animais / Pets',
+    'Carros / Veículos',
+    'Princesas / Contos',
+    'Espaço / Astronomia',
+];
 
 const form = useForm({
     nome: '',
@@ -18,8 +31,29 @@ const form = useForm({
     email: '',
     telefone: '',
     diagnostico: '',
+    interesses: [],
     anexo: null,
 });
+
+const addInteresse = () => {
+    const valor = novoInteresse.value.trim();
+    if (valor && !form.interesses.includes(valor)) {
+        form.interesses.push(valor);
+        novoInteresse.value = '';
+    }
+};
+
+const toggleSugestao = (item) => {
+    if (form.interesses.includes(item)) {
+        removeInteresse(item);
+    } else {
+        form.interesses.push(item);
+    }
+};
+
+const removeInteresse = (item) => {
+    form.interesses = form.interesses.filter((i) => i !== item);
+};
 
 const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -68,7 +102,7 @@ const submit = () => {
                             v-model="form.nome"
                             required
                             autofocus
-                            placeholder="Ex: João da Silva"
+                            placeholder="Ex: Arthur Gabriel Silva"
                         />
                         <InputError class="mt-2" :message="form.errors.nome" />
                     </div>
@@ -117,12 +151,86 @@ const submit = () => {
                         <InputLabel for="diagnostico" value="Diagnóstico / Queixa Principal" />
                         <textarea
                             id="diagnostico"
-                            rows="4"
+                            rows="3"
                             class="mt-1 block w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                             v-model="form.diagnostico"
-                            placeholder="Descreva o quadro clínico, objetivos terapêuticos ou observações iniciais..."
+                            placeholder="Ex: Dificuldade no fonema /r/ vibrante, ceceio anterior, hipotonia labial..."
                         ></textarea>
                         <InputError class="mt-2" :message="form.errors.diagnostico" />
+                    </div>
+
+                    <div class="rounded-2xl border border-indigo-100 bg-indigo-50/40 p-5 space-y-3">
+                        <div class="flex items-center gap-2">
+                            <SparklesIcon class="h-5 w-5 text-indigo-600" />
+                            <div>
+                                <h3 class="text-sm font-bold text-indigo-950">Interesses & Preferências do Paciente</h3>
+                                <p class="text-xs text-indigo-700">
+                                    Essas palavras-chave serão usadas pela <strong>Inteligência Artificial</strong> para gerar histórias e exercícios personalizados.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-2">
+                            <TextInput
+                                type="text"
+                                class="block w-full rounded-xl bg-white border-indigo-200 text-sm placeholder:text-gray-400"
+                                v-model="novoInteresse"
+                                @keydown.enter.prevent="addInteresse"
+                                placeholder="Digite um tema (ex: Pokémon, Basquete, Robótica) e tecle Enter..."
+                            />
+                            <button
+                                type="button"
+                                @click="addInteresse"
+                                class="inline-flex items-center gap-1 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 transition"
+                            >
+                                <PlusIcon class="h-4 w-4" />
+                                Inserir
+                            </button>
+                        </div>
+
+                        <div v-if="form.interesses.length > 0" class="flex flex-wrap gap-2 pt-2">
+                            <span
+                                v-for="interesse in form.interesses"
+                                :key="interesse"
+                                class="inline-flex items-center gap-1.5 rounded-lg border border-indigo-300 bg-white px-3 py-1 text-xs font-bold text-indigo-900 shadow-sm"
+                            >
+                                {{ interesse }}
+                                <button
+                                    type="button"
+                                    @click="removeInteresse(interesse)"
+                                    class="text-indigo-400 hover:text-red-600 transition"
+                                >
+                                    <XMarkIcon class="h-3.5 w-3.5" />
+                                </button>
+                            </span>
+                        </div>
+                        <div v-else class="text-xs text-gray-500 italic">
+                            Nenhum interesse selecionado ainda. Adicione acima ou selecione as sugestões abaixo:
+                        </div>
+
+                        <div class="pt-2 border-t border-indigo-100/80">
+                            <span class="text-[11px] font-semibold uppercase tracking-wider text-indigo-800/70 block mb-1.5">
+                                Sugestões Rápidas:
+                            </span>
+                            <div class="flex flex-wrap gap-1.5">
+                                <button
+                                    v-for="sugestao in sugestoes"
+                                    :key="sugestao"
+                                    type="button"
+                                    @click="toggleSugestao(sugestao)"
+                                    :class="[
+                                        form.interesses.includes(sugestao)
+                                            ? 'bg-indigo-600 text-white border-indigo-600'
+                                            : 'bg-white text-gray-700 border-gray-200 hover:border-indigo-300 hover:bg-indigo-50/50',
+                                        'rounded-lg border px-2.5 py-1 text-xs font-medium transition'
+                                    ]"
+                                >
+                                    + {{ sugestao }}
+                                </button>
+                            </div>
+                        </div>
+
+                        <InputError class="mt-2" :message="form.errors.interesses" />
                     </div>
 
                     <div>
@@ -172,7 +280,7 @@ const submit = () => {
                             Cancelar
                         </Link>
                         <PrimaryButton
-                            class="!rounded-xl !bg-green-500 !px-6 !py-2.5 !font-semibold hover:!bg-green-700"
+                            class="!rounded-xl !bg-blue-600 !px-6 !py-2.5 !font-semibold hover:!bg-blue-700"
                             :class="{ 'opacity-25': form.processing }"
                             :disabled="form.processing"
                         >

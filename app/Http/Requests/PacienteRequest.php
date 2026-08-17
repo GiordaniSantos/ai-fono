@@ -29,6 +29,8 @@ class PacienteRequest extends FormRequest
             'diagnostico' => ['nullable', 'string'],
             'anexo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:4096'],
             'remover_anexo' => ['nullable', 'boolean'],
+            'interesses' => ['nullable', 'array'],
+            'interesses.*' => ['string', 'max:50'],
         ];
     }
 

@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('telefone')->nullable();
             $table->date('data_nascimento')->nullable();
             $table->text('diagnostico')->nullable();
+            $table->json('interesses')->nullable();
             $table->string('codigo_acesso', 10)->unique();
             $table->timestamps();
         });
