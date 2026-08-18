@@ -29,7 +29,7 @@ class ExercicioService extends AbstractService
     {
         return [
             'exercicio' => $model ? $model->loadMissing('paciente') : null,
-            'pacientes' => Paciente::where('fonoaudiologo_id', Auth::id())->select('id', 'nome')->orderBy('nome')->get(),
+            'pacientes' => Paciente::where('fonoaudiologo_id', Auth::id())->select('id', 'nome', 'data_nascimento', 'diagnostico', 'interesses')->orderBy('nome')->get(),
             'categorias' => Categoria::where('fonoaudiologo_id', Auth::id())->select('id', 'nome')->orderBy('nome')->get(),
         ];
     }

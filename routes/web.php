@@ -28,6 +28,8 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('pacientes', PacienteController::class);
     Route::resource('categorias', CategoriaController::class)->only(['index', 'store', 'update', 'destroy']);
+
+    Route::post('/exercicios/gerar-ia', [ExercicioController::class, 'gerarDescricaoIa'])->name('exercicios.gerar-ia');
     Route::resource('exercicios', ExercicioController::class);
 });
 
