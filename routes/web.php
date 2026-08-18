@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\CategoriaController;
+use App\Http\Controllers\ExercicioController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PacienteController;
 use Illuminate\Foundation\Application;
@@ -25,6 +27,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::resource('pacientes', PacienteController::class);
+    Route::resource('categorias', CategoriaController::class)->only(['index', 'store', 'update', 'destroy']);
+    Route::resource('exercicios', ExercicioController::class);
 });
 
 require __DIR__.'/auth.php';

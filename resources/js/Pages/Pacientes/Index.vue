@@ -21,6 +21,7 @@ import {
     PhotoIcon,
     XMarkIcon,
     ArrowTopRightOnSquareIcon,
+    SparklesIcon,
 } from '@heroicons/vue/24/outline';
 
 const props = defineProps({
@@ -85,7 +86,7 @@ const formatDate = (dateString) => {
 
                 <Link
                     :href="route('pacientes.create')"
-                    class="inline-flex items-center justify-center gap-2 rounded-xl bg-sky-500 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                    class="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                 >
                     <PlusIcon class="h-5 w-5" />
                     Novo Paciente
@@ -106,7 +107,6 @@ const formatDate = (dateString) => {
                 />
             </div>
 
-            <!-- Tabela -->
             <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
                 <div v-if="filteredPacientes.length === 0" class="py-12 text-center">
                     <UserIcon class="mx-auto h-12 w-12 text-gray-300" />
@@ -173,7 +173,15 @@ const formatDate = (dateString) => {
                                 </td>
 
                                 <td class="px-6 py-4 text-right">
-                                    <div class="flex items-center justify-end gap-2">
+                                    <div class="flex items-center justify-end gap-1.5">
+                                        <Link
+                                            :href="route('exercicios.create', { paciente_id: paciente.id })"
+                                            class="rounded-lg p-1.5 text-gray-500 hover:bg-indigo-50 hover:text-indigo-600 transition"
+                                            title="Criar exercício para este paciente"
+                                        >
+                                            <SparklesIcon class="h-5 w-5" />
+                                        </Link>
+
                                         <Link
                                             :href="route('pacientes.edit', paciente.id)"
                                             class="rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 hover:text-blue-600 transition"
@@ -181,6 +189,7 @@ const formatDate = (dateString) => {
                                         >
                                             <PencilSquareIcon class="h-5 w-5" />
                                         </Link>
+
                                         <button
                                             @click="deletePaciente(paciente)"
                                             type="button"

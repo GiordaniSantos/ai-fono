@@ -20,6 +20,8 @@ import {
     ArrowRightOnRectangleIcon,
     ChevronDownIcon,
     UserGroupIcon,
+    SparklesIcon,
+    TagIcon,
 } from '@heroicons/vue/24/outline';
 
 const page = usePage();
@@ -60,6 +62,8 @@ const sidebarOpen = ref(false);
 const navigation = [
     { name: 'Dashboard', href: route('dashboard'), icon: HomeIcon, current: route().current('dashboard') },
     { name: 'Pacientes', href: route('pacientes.index'), icon: UserGroupIcon, current: route().current('pacientes.*') },
+    { name: 'Exercícios', href: route('exercicios.index'), icon: SparklesIcon, current: route().current('exercicios.*') },
+    { name: 'Categorias', href: route('categorias.index'), icon: TagIcon, current: route().current('categorias.*') },
 ];
 </script>
 

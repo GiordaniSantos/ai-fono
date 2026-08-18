@@ -54,4 +54,9 @@ class Fonoaudiologo extends Authenticatable implements HasMedia
     {
         return $this->hasMany(Paciente::class);
     }
+
+    public function categorias(): HasMany
+    {
+        return $this->hasMany(Categoria::class);
+    }
 }

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
 class Paciente extends AbstractBaseModel
@@ -64,4 +65,8 @@ class Paciente extends AbstractBaseModel
         return $media ? $media->getUrl() : null;
     }
 
+    public function exercicios(): HasMany
+    {
+        return $this->hasMany(Exercicio::class);
+    }
 }
