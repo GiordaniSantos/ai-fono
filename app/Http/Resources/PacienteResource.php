@@ -15,14 +15,17 @@ class PacienteResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id'             => $this->id,
-            'nome'           => $this->nome,
-            'foto_url'       => $this->foto_url,
-            'interesses'     => $this->interesses ?? [],
-            'codigo_acesso'  => $this->codigo_acesso,
-            'fonoaudiologo'  => [
-                'id'   => $this->fonoaudiologo?->id,
+            'id' => $this->id,
+            'nome' => $this->nome,
+            'foto_url' => $this->foto_url,
+            'email' => $this->email,
+            'telefone' => $this->telefone,
+            'interesses' => $this->interesses ?? [],
+            'codigo_acesso' => $this->codigo_acesso,
+            'fonoaudiologo' => [
+                'id' => $this->fonoaudiologo?->id,
                 'nome' => $this->fonoaudiologo?->name,
+                'foto' => $this->fonoaudiologo?->foto_url
             ],
         ];
     }

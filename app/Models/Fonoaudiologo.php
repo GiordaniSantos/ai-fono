@@ -35,6 +35,10 @@ class Fonoaudiologo extends Authenticatable implements HasMedia
         ];
     }
 
+    protected $appends = [
+        'foto_url',
+    ];
+
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('foto')->singleFile();
