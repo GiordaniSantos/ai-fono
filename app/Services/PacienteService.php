@@ -17,6 +17,13 @@ class PacienteService extends AbstractService
         return $this->model->newQuery()->with('media')->where('fonoaudiologo_id', $fonoaudiologoId)->latest()->get();
     }
 
+    public function findByCodigoAcesso(string $codigo): ?Paciente
+    {
+        $codigoLimpo = trim(strtoupper($codigo));
+
+        return $this->model->newQuery()->where('codigo_acesso', $codigoLimpo)->with(['fonoaudiologo:id,name'])->first();
+    }
+
     public function create(array $attributes): Model
     {
         $foto = $attributes['foto'] ?? null;
