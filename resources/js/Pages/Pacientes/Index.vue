@@ -129,8 +129,34 @@ const formatDate = (dateString) => {
                         <tbody class="divide-y divide-gray-100 bg-white">
                             <tr v-for="paciente in filteredPacientes" :key="paciente.id" class="hover:bg-gray-50/80 transition">
                                 <td class="px-6 py-4">
-                                    <div class="font-medium text-gray-900">{{ paciente.nome }}</div>
-                                    <div class="text-xs text-gray-500 truncate max-w-xs">{{ paciente.diagnostico || 'Sem diagnóstico informado' }}</div>
+                                    <div class="flex items-center gap-3.5">
+                                        <button
+                                            v-if="paciente.foto_url"
+                                            type="button"
+                                            @click="activeModalImage = paciente.foto_url"
+                                            class="group relative h-10 w-10 shrink-0 overflow-hidden rounded-full border border-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            title="Ver foto do paciente"
+                                        >
+                                            <img
+                                                :src="paciente.foto_url"
+                                                :alt="paciente.nome"
+                                                class="h-full w-full object-cover transition group-hover:scale-110"
+                                            />
+                                        </button>
+                                        <div
+                                            v-else
+                                            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-100 border border-slate-200 text-slate-400"
+                                        >
+                                            <UserIcon class="h-5 w-5 text-slate-400" />
+                                        </div>
+
+                                        <div class="min-w-0">
+                                            <div class="font-medium text-gray-900 truncate">{{ paciente.nome }}</div>
+                                            <div class="text-xs text-gray-500 truncate max-w-xs">
+                                                {{ paciente.diagnostico || 'Sem diagnóstico informado' }}
+                                            </div>
+                                        </div>
+                                    </div>
                                 </td>
 
                                 <td class="px-6 py-4">
@@ -139,7 +165,7 @@ const formatDate = (dateString) => {
                                         type="button"
                                         @click="activeModalImage = paciente.anexo_url"
                                         class="group relative block h-10 w-10 overflow-hidden rounded-lg border border-gray-200 bg-gray-100 shadow-sm"
-                                        title="Clique para ampliar o laudo"
+                                        title="Clique para ampliar o laudo/exame"
                                     >
                                         <img
                                             :src="paciente.anexo_url"
@@ -233,7 +259,7 @@ const formatDate = (dateString) => {
                     >
                         <DialogPanel class="relative mx-auto max-w-3xl overflow-hidden rounded-2xl bg-white p-4 shadow-2xl">
                             <div class="flex items-center justify-between border-b border-gray-100 pb-3">
-                                <h3 class="text-base font-semibold text-gray-900">Imagem do Diagnóstico / Exame</h3>
+                                <h3 class="text-base font-semibold text-gray-900">Visualização de Imagem</h3>
                                 <div class="flex items-center gap-3">
                                     <a
                                         :href="activeModalImage"
@@ -255,7 +281,7 @@ const formatDate = (dateString) => {
                             <div class="mt-4 flex items-center justify-center bg-gray-900 rounded-xl overflow-hidden p-2">
                                 <img
                                     :src="activeModalImage"
-                                    alt="Laudo Ampliado"
+                                    alt="Imagem Ampliada"
                                     class="max-h-[70vh] w-auto object-contain rounded-lg"
                                 />
                             </div>

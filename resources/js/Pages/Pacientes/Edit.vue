@@ -16,6 +16,8 @@ import {
     PlusIcon,
     SparklesIcon,
     XMarkIcon,
+    CameraIcon,
+    UserCircleIcon,
 } from '@heroicons/vue/24/outline';
 import { maskPhone } from '@/Utils/mask';
 
@@ -26,8 +28,12 @@ const props = defineProps({
     },
 });
 
-const fileInput = ref(null);
-const previewUrl = ref(props.paciente.anexo_url || null);
+const fotoInput = ref(null);
+const previewFotoUrl = ref(props.paciente.foto_url || null);
+
+const anexoInput = ref(null);
+const previewAnexoUrl = ref(props.paciente.anexo_url || null);
+
 const novoInteresse = ref('');
 
 const sugestoes = [
@@ -44,6 +50,8 @@ const sugestoes = [
 
 const form = useForm({
     _method: 'PATCH',
+    foto: null,
+    remover_foto: false,
     nome: props.paciente.nome,
     data_nascimento: props.paciente.data_nascimento ? props.paciente.data_nascimento.substring(0, 10) : '',
     email: props.paciente.email ?? '',
@@ -53,6 +61,38 @@ const form = useForm({
     anexo: null,
     remover_anexo: false,
 });
+
+const handleFotoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+        form.foto = file;
+        form.remover_foto = false;
+        previewFotoUrl.value = URL.createObjectURL(file);
+    }
+};
+
+const removeFoto = () => {
+    form.foto = null;
+    form.remover_foto = true;
+    previewFotoUrl.value = null;
+    if (fotoInput.value) fotoInput.value.value = '';
+};
+
+const handleAnexoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+        form.anexo = file;
+        form.remover_anexo = false;
+        previewAnexoUrl.value = URL.createObjectURL(file);
+    }
+};
+
+const removeAnexo = () => {
+    form.anexo = null;
+    form.remover_anexo = true;
+    previewAnexoUrl.value = null;
+    if (anexoInput.value) anexoInput.value.value = '';
+};
 
 const addInteresse = () => {
     const valor = novoInteresse.value.trim();
@@ -72,22 +112,6 @@ const toggleSugestao = (item) => {
 
 const removeInteresse = (item) => {
     form.interesses = form.interesses.filter((i) => i !== item);
-};
-
-const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-        form.anexo = file;
-        form.remover_anexo = false;
-        previewUrl.value = URL.createObjectURL(file);
-    }
-};
-
-const removeFile = () => {
-    form.anexo = null;
-    form.remover_anexo = true;
-    previewUrl.value = null;
-    if (fileInput.value) fileInput.value.value = '';
 };
 
 const submit = () => {
@@ -131,6 +155,63 @@ const submit = () => {
 
             <div class="rounded-2xl border border-gray-200 bg-white p-6 sm:p-8 shadow-sm">
                 <form @submit.prevent="submit" class="space-y-6">
+                    <div class="flex flex-col sm:flex-row items-center gap-5 border-b border-gray-100 pb-6">
+                        <input
+                            ref="fotoInput"
+                            type="file"
+                            accept="image/*"
+                            class="hidden"
+                            @change="handleFotoChange"
+                        />
+
+                        <div class="relative group">
+                            <div
+                                v-if="previewFotoUrl"
+                                class="h-24 w-24 rounded-full overflow-hidden border-2 border-blue-500 shadow-md bg-slate-50"
+                            >
+                                <img
+                                    :src="previewFotoUrl"
+                                    alt="Foto do Paciente"
+                                    class="h-full w-full object-cover"
+                                />
+                            </div>
+                            <div
+                                v-else
+                                class="flex h-24 w-24 items-center justify-center rounded-full bg-slate-100 border-2 border-dashed border-slate-300 text-slate-400"
+                            >
+                                <UserCircleIcon class="h-16 w-16 stroke-1" />
+                            </div>
+
+                            <button
+                                v-if="previewFotoUrl"
+                                type="button"
+                                @click="removeFoto"
+                                class="absolute -top-1 -right-1 rounded-full bg-red-600 p-1 text-white shadow-md hover:bg-red-700 transition"
+                                title="Remover foto"
+                            >
+                                <XMarkIcon class="h-3.5 w-3.5" />
+                            </button>
+                        </div>
+
+                        <div class="text-center sm:text-left space-y-1">
+                            <h3 class="text-sm font-bold text-gray-900">Foto do Paciente</h3>
+                            <p class="text-xs text-gray-500">
+                                Esta foto será exibida no perfil e na identificação do aplicativo. (PNG, JPG até 4MB)
+                            </p>
+                            <div class="pt-1">
+                                <button
+                                    type="button"
+                                    @click="fotoInput.click()"
+                                    class="inline-flex items-center gap-1.5 rounded-xl border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 shadow-sm hover:bg-gray-50 transition"
+                                >
+                                    <CameraIcon class="h-4 w-4 text-gray-500" />
+                                    {{ previewFotoUrl ? 'Alterar Foto' : 'Selecionar Foto' }}
+                                </button>
+                            </div>
+                            <InputError class="mt-1" :message="form.errors.foto" />
+                        </div>
+                    </div>
+
                     <div>
                         <InputLabel for="nome" value="Nome Completo *" />
                         <TextInput
@@ -186,7 +267,7 @@ const submit = () => {
                         <textarea
                             id="diagnostico"
                             rows="3"
-                            class="mt-1 block w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                            class="mt-1 block w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
                             v-model="form.diagnostico"
                         ></textarea>
                         <InputError class="mt-2" :message="form.errors.diagnostico" />
@@ -270,20 +351,20 @@ const submit = () => {
                         <InputLabel value="Anexo / Imagem do Diagnóstico (Exame, Audiometria, Laudo)" />
 
                         <input
-                            ref="fileInput"
+                            ref="anexoInput"
                             type="file"
                             accept="image/*"
                             class="hidden"
-                            @change="handleFileChange"
+                            @change="handleAnexoChange"
                         />
 
                         <div
-                            v-if="!previewUrl"
-                            @click="fileInput.click()"
+                            v-if="!previewAnexoUrl"
+                            @click="anexoInput.click()"
                             class="flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-gray-300 p-6 transition hover:border-blue-500 hover:bg-blue-50/30"
                         >
                             <PhotoIcon class="h-10 w-10 text-gray-400" />
-                            <span class="mt-2 text-sm font-semibold text-gray-700">Clique para selecionar uma imagem</span>
+                            <span class="mt-2 text-sm font-semibold text-gray-700">Clique para selecionar imagem do laudo ou exame</span>
                             <span class="text-xs text-gray-500">PNG, JPG ou WEBP até 4MB</span>
                         </div>
 
@@ -294,7 +375,7 @@ const submit = () => {
                             <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                                 <div class="flex items-center gap-4">
                                     <img
-                                        :src="previewUrl"
+                                        :src="previewAnexoUrl"
                                         alt="Imagem do diagnóstico"
                                         class="h-28 w-28 rounded-xl border border-gray-300 bg-white object-cover shadow-sm"
                                     />
@@ -304,7 +385,7 @@ const submit = () => {
 
                                         <div class="mt-3 flex items-center gap-3">
                                             <a
-                                                :href="previewUrl"
+                                                :href="previewAnexoUrl"
                                                 target="_blank"
                                                 class="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-700 hover:underline"
                                             >
@@ -318,7 +399,7 @@ const submit = () => {
                                 <div class="flex items-center gap-2 border-t border-gray-200 pt-3 sm:border-0 sm:pt-0">
                                     <button
                                         type="button"
-                                        @click="fileInput.click()"
+                                        @click="anexoInput.click()"
                                         class="inline-flex items-center gap-1.5 rounded-xl border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 shadow-sm hover:bg-gray-100 transition"
                                     >
                                         <ArrowPathIcon class="h-4 w-4 text-gray-500" />
@@ -326,7 +407,7 @@ const submit = () => {
                                     </button>
                                     <button
                                         type="button"
-                                        @click="removeFile"
+                                        @click="removeAnexo"
                                         class="inline-flex items-center gap-1.5 rounded-xl border border-red-200 bg-white px-3 py-1.5 text-xs font-semibold text-red-600 shadow-sm hover:bg-red-50 transition"
                                     >
                                         <TrashIcon class="h-4 w-4 text-red-500" />

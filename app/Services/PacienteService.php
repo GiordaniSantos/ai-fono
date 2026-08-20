@@ -19,10 +19,18 @@ class PacienteService extends AbstractService
 
     public function create(array $attributes): Model
     {
+        $foto = $attributes['foto'] ?? null;
+        $anexo = $attributes['anexo'] ?? null;
+        unset($attributes['foto'], $attributes['anexo']);
+
         $model = parent::create($attributes);
 
-        if (isset($attributes['anexo'])) {
-            $model->addMedia($attributes['anexo'])->toMediaCollection('anexo');
+        if ($foto) {
+            $model->addMedia($foto)->toMediaCollection(Paciente::COLLECTION_FOTO ?? 'foto');
+        }
+
+        if ($anexo) {
+            $model->addMedia($anexo)->toMediaCollection(Paciente::COLLECTION_ANEXO ?? 'anexo');
         }
 
         return $model;
@@ -30,18 +38,36 @@ class PacienteService extends AbstractService
 
     public function update(int $id, array $attributes): Model
     {
+        $foto = $attributes['foto'] ?? null;
+        $removerFoto = filter_var($attributes['remover_foto'] ?? false, FILTER_VALIDATE_BOOLEAN);
+
         $anexo = $attributes['anexo'] ?? null;
         $removerAnexo = filter_var($attributes['remover_anexo'] ?? false, FILTER_VALIDATE_BOOLEAN);
-        unset($attributes['anexo'], $attributes['remover_anexo']);
+
+        unset(
+            $attributes['foto'],
+            $attributes['remover_foto'],
+            $attributes['anexo'],
+            $attributes['remover_anexo']
+        );
 
         $model = parent::update($id, $attributes);
 
-        if ($removerAnexo) {
-            $model->clearMediaCollection($model::COLLECTION_ANEXO);
+        $collectionFoto = $model::COLLECTION_FOTO;
+        $collectionAnexo = $model::COLLECTION_ANEXO;
+
+        if ($removerFoto || $foto) {
+            $model->clearMediaCollection($collectionFoto);
+        }
+        if ($foto) {
+            $model->addMedia($foto)->toMediaCollection($collectionFoto);
         }
 
+        if ($removerAnexo || $anexo) {
+            $model->clearMediaCollection($collectionAnexo);
+        }
         if ($anexo) {
-            $model->addMedia($anexo)->toMediaCollection($model::COLLECTION_ANEXO);
+            $model->addMedia($anexo)->toMediaCollection($collectionAnexo);
         }
 
         return $model;

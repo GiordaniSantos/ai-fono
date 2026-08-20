@@ -27,6 +27,8 @@ class PacienteRequest extends FormRequest
             'telefone' => ['nullable', 'string', 'max:20'],
             'data_nascimento' => ['required', 'date'],
             'diagnostico' => ['nullable', 'string'],
+            'foto' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:4096'],
+            'remover_foto' => ['nullable', 'boolean'],
             'anexo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:4096'],
             'remover_anexo' => ['nullable', 'boolean'],
             'interesses' => ['nullable', 'array'],

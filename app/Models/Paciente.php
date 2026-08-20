@@ -28,6 +28,7 @@ class Paciente extends AbstractBaseModel
     ];
 
     protected $appends = [
+        'foto_url',
         'anexo_url',
     ];
 
@@ -59,10 +60,14 @@ class Paciente extends AbstractBaseModel
         $this->addMediaCollection(self::COLLECTION_ANEXO)->singleFile();
     }
 
+    public function getFotoUrlAttribute(): ?string
+    {
+        return $this->getFirstMediaUrl(self::COLLECTION_FOTO) ?: null;
+    }
+
     public function getAnexoUrlAttribute(): ?string
     {
-        $media = $this->getFirstMedia(self::COLLECTION_ANEXO);
-        return $media ? $media->getUrl() : null;
+        return $this->getFirstMediaUrl(self::COLLECTION_ANEXO) ?: null;
     }
 
     public function exercicios(): HasMany
