@@ -4,6 +4,7 @@ use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\ExercicioController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PacienteController;
+use App\Http\Controllers\PrescricaoController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -31,6 +32,11 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/exercicios/gerar-ia', [ExercicioController::class, 'gerarDescricaoIa'])->name('exercicios.gerar-ia');
     Route::resource('exercicios', ExercicioController::class);
+
+    Route::patch('/prescricoes/{prescricao}/toggle-realizada', [PrescricaoController::class, 'toggleRealizada'])->name('prescricoes.toggle-realizada');
+    Route::resource('prescricoes', PrescricaoController::class)->parameters([
+        'prescricoes' => 'prescricao',
+    ]);
 });
 
 require __DIR__.'/auth.php';

@@ -22,6 +22,7 @@ import {
     UserGroupIcon,
     SparklesIcon,
     TagIcon,
+    ClipboardDocumentListIcon,
 } from '@heroicons/vue/24/outline';
 
 const page = usePage();
@@ -64,6 +65,7 @@ const navigation = [
     { name: 'Pacientes', href: route('pacientes.index'), icon: UserGroupIcon, current: route().current('pacientes.*') },
     { name: 'Exercícios', href: route('exercicios.index'), icon: SparklesIcon, current: route().current('exercicios.*') },
     { name: 'Categorias', href: route('categorias.index'), icon: TagIcon, current: route().current('categorias.*') },
+    { name: 'Prescrições', href: route('prescricoes.index'), icon: ClipboardDocumentListIcon, current: route().current('prescricoes.*') },
 ];
 </script>
 
