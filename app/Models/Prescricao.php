@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Prescricao extends AbstractBaseModel
 {
@@ -66,6 +68,16 @@ class Prescricao extends AbstractBaseModel
         }
 
         return 'vigente';
+    }
+
+    public function execucoes(): HasMany
+    {
+        return $this->hasMany(ExecucaoPrescricao::class, 'prescricao_id');
+    }
+
+    public function execucaoHoje(): HasOne
+    {
+        return $this->hasOne(ExecucaoPrescricao::class, 'prescricao_id')->whereDate('data_execucao', Carbon::today());
     }
 
     public function fonoaudiologo(): BelongsTo

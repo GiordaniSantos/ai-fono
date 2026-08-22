@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\CategoriaController;
+use App\Http\Controllers\ExecucaoPrescricaoController;
 use App\Http\Controllers\ExercicioController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PacienteController;
@@ -37,6 +38,9 @@ Route::middleware('auth')->group(function () {
     Route::resource('prescricoes', PrescricaoController::class)->parameters([
         'prescricoes' => 'prescricao',
     ]);
+
+    Route::get('/execucoes', [ExecucaoPrescricaoController::class, 'index'])->name('execucoes.index');
+    Route::patch('/execucoes/{execucao}/comentario', [ExecucaoPrescricaoController::class, 'updateComentario'])->name('execucoes.comentario');
 });
 
 require __DIR__.'/auth.php';
