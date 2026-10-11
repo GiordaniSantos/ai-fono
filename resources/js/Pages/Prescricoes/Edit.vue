@@ -5,12 +5,12 @@ import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import { computed } from 'vue';
+import { ref, computed } from 'vue';
 import {
     ArrowLeftIcon,
     ClockIcon,
     CalendarIcon,
-    CheckCircleIcon,
+    MagnifyingGlassIcon,
 } from '@heroicons/vue/24/outline';
 
 const props = defineProps({
@@ -28,9 +28,11 @@ const props = defineProps({
     },
 });
 
+const buscaExercicio = ref('');
+
 const form = useForm({
     paciente_id: props.prescricao.paciente_id,
-    exercicio_id: props.prescricao.exercicio_id,
+    exercicios: props.prescricao.exercicios ? props.prescricao.exercicios.map((ex) => ex.id) : [],
     data_inicio: props.prescricao.data_inicio ? props.prescricao.data_inicio.substring(0, 10) : '',
     data_fim: props.prescricao.data_fim ? props.prescricao.data_fim.substring(0, 10) : '',
     frequencia_diaria: props.prescricao.frequencia_diaria || 1,
@@ -38,13 +40,33 @@ const form = useForm({
 });
 
 const exerciciosFiltrados = computed(() => {
-    if (!form.paciente_id) {
-        return props.exercicios;
+    let lista = props.exercicios;
+
+    if (form.paciente_id) {
+        lista = lista.filter(
+            (ex) => ex.paciente_id === null || String(ex.paciente_id) === String(form.paciente_id)
+        );
     }
-    return props.exercicios.filter(
-        (ex) => ex.paciente_id === null || String(ex.paciente_id) === String(form.paciente_id)
-    );
+
+    if (buscaExercicio.value.trim()) {
+        const termo = buscaExercicio.value.toLowerCase();
+        lista = lista.filter((ex) => {
+            const matchesNome = ex.nome.toLowerCase().includes(termo);
+            const matchesCategoria = ex.categoria?.nome.toLowerCase().includes(termo);
+            return matchesNome || matchesCategoria;
+        });
+    }
+
+    return lista;
 });
+
+const selecionarTodos = () => {
+    form.exercicios = exerciciosFiltrados.value.map((e) => e.id);
+};
+
+const limparSelecao = () => {
+    form.exercicios = [];
+};
 
 const frequenciasRapidas = [1, 2, 3, 4, 5];
 
@@ -69,7 +91,7 @@ const submit = () => {
             </div>
         </template>
 
-        <div class="">
+        <div>
             <div class="rounded-2xl border border-gray-200 bg-white p-6 sm:p-8 shadow-sm">
                 <form @submit.prevent="submit" class="space-y-6">
                     <div>
@@ -91,51 +113,126 @@ const submit = () => {
                         <InputError class="mt-2" :message="form.errors.paciente_id" />
                     </div>
 
-                    <div>
-                        <InputLabel for="exercicio_id" value="Exercício Prescrito *" />
-                        <select
-                            id="exercicio_id"
-                            v-model="form.exercicio_id"
-                            required
-                            class="mt-1 block w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
-                        >
-                            <option
-                                v-for="exercicio in exerciciosFiltrados"
-                                :key="exercicio.id"
-                                :value="exercicio.id"
-                            >
-                                {{ exercicio.nome }}
-                                {{ exercicio.categoria ? ` (${exercicio.categoria.nome})` : '' }}
-                                {{ exercicio.paciente_id ? ' [Exclusivo]' : ' [Geral]' }}
-                            </option>
-                        </select>
-                        <InputError class="mt-2" :message="form.errors.exercicio_id" />
-                    </div>
+                    <div class="space-y-3">
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <div>
+                                <InputLabel value="Exercícios Prescritos (Múltipla Seleção) *" />
+                                <p class="text-xs text-gray-500">
+                                    Marque ou desmarque exercícios para ajustar esta prescrição.
+                                </p>
+                            </div>
 
-                    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                        <div>
-                            <InputLabel for="data_inicio" value="Data de Início *" />
-                            <TextInput
-                                id="data_inicio"
-                                type="date"
-                                class="mt-1 block w-full rounded-xl"
-                                v-model="form.data_inicio"
-                                required
-                            />
-                            <InputError class="mt-2" :message="form.errors.data_inicio" />
+                            <div class="flex items-center gap-2 text-xs">
+                                <button
+                                    type="button"
+                                    @click="selecionarTodos"
+                                    class="font-semibold text-blue-600 hover:underline"
+                                >
+                                    Marcar todos exibidos
+                                </button>
+                                <span class="text-gray-300">|</span>
+                                <button
+                                    type="button"
+                                    @click="limparSelecao"
+                                    class="font-semibold text-gray-500 hover:underline"
+                                >
+                                    Desmarcar todos
+                                </button>
+                            </div>
                         </div>
 
-                        <div>
-                            <InputLabel for="data_fim" value="Data Final da Vigência (Opcional)" />
-                            <TextInput
-                                id="data_fim"
-                                type="date"
-                                class="mt-1 block w-full rounded-xl"
-                                v-model="form.data_fim"
-                                :min="form.data_inicio"
+                        <div class="relative">
+                            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                                <MagnifyingGlassIcon class="h-4 w-4 text-gray-400" />
+                            </div>
+                            <input
+                                v-model="buscaExercicio"
+                                type="text"
+                                placeholder="Filtrar exercícios pelo nome ou categoria..."
+                                class="block w-full rounded-xl border border-gray-300 bg-white py-2 pl-9 pr-3 text-xs text-gray-900 focus:border-blue-500 focus:ring-blue-500"
                             />
-                            <p class="mt-1 text-xs text-gray-500">Deixe em branco para tempo indeterminado.</p>
-                            <InputError class="mt-2" :message="form.errors.data_fim" />
+                        </div>
+
+                        <div class="max-h-64 overflow-y-auto rounded-xl border border-gray-200 bg-white p-3 space-y-1.5 shadow-inner">
+                            <div
+                                v-if="exerciciosFiltrados.length === 0"
+                                class="py-6 text-center text-xs text-gray-400 italic"
+                            >
+                                Nenhum exercício encontrado para os critérios selecionados.
+                            </div>
+
+                            <label
+                                v-for="exercicio in exerciciosFiltrados"
+                                :key="exercicio.id"
+                                class="flex items-center justify-between gap-3 p-2.5 rounded-lg hover:bg-slate-50 cursor-pointer border border-transparent hover:border-slate-200 transition"
+                                :class="{ 'bg-blue-50/60 border-blue-100': form.exercicios.includes(exercicio.id) }"
+                            >
+                                <div class="flex items-center gap-3 min-w-0">
+                                    <input
+                                        type="checkbox"
+                                        :value="exercicio.id"
+                                        v-model="form.exercicios"
+                                        class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                    />
+                                    <div class="min-w-0">
+                                        <span class="text-sm font-semibold text-gray-900 block truncate">
+                                            {{ exercicio.nome }}
+                                        </span>
+                                        <span v-if="exercicio.categoria" class="text-xs text-gray-500">
+                                            {{ exercicio.categoria.nome }}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <span
+                                    class="shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-md"
+                                    :class="exercicio.paciente_id ? 'bg-amber-100 text-amber-800' : 'bg-gray-100 text-gray-600'"
+                                >
+                                    {{ exercicio.paciente_id ? 'Exclusivo' : 'Geral' }}
+                                </span>
+                            </label>
+                        </div>
+
+                        <div class="flex items-center justify-between text-xs text-gray-600">
+                            <span>
+                                Selecionados: <strong class="text-blue-600">{{ form.exercicios.length }}</strong> de {{ exercicios.length }} exercícios
+                            </span>
+                        </div>
+
+                        <InputError :message="form.errors.exercicios" />
+                    </div>
+
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-gray-500">
+                            <CalendarIcon class="h-4 w-4" />
+                            Período de Vigência no Aplicativo
+                        </div>
+
+                        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                            <div>
+                                <InputLabel for="data_inicio" value="Data de Início *" />
+                                <TextInput
+                                    id="data_inicio"
+                                    type="date"
+                                    class="mt-1 block w-full rounded-xl"
+                                    v-model="form.data_inicio"
+                                    required
+                                />
+                                <InputError class="mt-2" :message="form.errors.data_inicio" />
+                            </div>
+
+                            <div>
+                                <InputLabel for="data_fim" value="Data Final da Vigência (Opcional)" />
+                                <TextInput
+                                    id="data_fim"
+                                    type="date"
+                                    class="mt-1 block w-full rounded-xl"
+                                    v-model="form.data_fim"
+                                    :min="form.data_inicio"
+                                />
+                                <p class="mt-1 text-xs text-gray-500">Deixe em branco para tempo indeterminado.</p>
+                                <InputError class="mt-2" :message="form.errors.data_fim" />
+                            </div>
                         </div>
                     </div>
 
@@ -199,8 +296,8 @@ const submit = () => {
                         </Link>
                         <PrimaryButton
                             class="!rounded-xl !bg-blue-600 !px-6 !py-2.5 !font-semibold hover:!bg-blue-700"
-                            :class="{ 'opacity-25': form.processing }"
-                            :disabled="form.processing"
+                            :class="{ 'opacity-25': form.processing || form.exercicios.length === 0 }"
+                            :disabled="form.processing || form.exercicios.length === 0"
                         >
                             Salvar Alterações
                         </PrimaryButton>

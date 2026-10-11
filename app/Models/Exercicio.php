@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Exercicio extends AbstractBaseModel
 {
@@ -32,5 +33,10 @@ class Exercicio extends AbstractBaseModel
     public function categoria(): BelongsTo
     {
         return $this->belongsTo(Categoria::class);
+    }
+
+    public function prescricoes(): BelongsToMany
+    {
+        return $this->belongsToMany(Prescricao::class, 'exercicio_prescricao', 'exercicio_id', 'prescricao_id')->withTimestamps();
     }
 }

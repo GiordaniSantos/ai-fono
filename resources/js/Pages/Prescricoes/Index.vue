@@ -19,11 +19,10 @@ import {
     TagIcon,
     CalendarIcon,
     ClockIcon,
-    FunnelIcon,
     XMarkIcon,
-    CheckCircleIcon,
     XCircleIcon,
     ArrowTopRightOnSquareIcon,
+    SparklesIcon,
 } from '@heroicons/vue/24/outline';
 import { CheckCircleIcon as CheckCircleSolid } from '@heroicons/vue/24/solid';
 
@@ -66,10 +65,14 @@ const filteredPrescricoes = computed(() => {
         if (search.value) {
             const term = search.value.toLowerCase();
             const matchesPaciente = p.paciente?.nome.toLowerCase().includes(term);
-            const matchesExercicio = p.exercicio?.nome.toLowerCase().includes(term);
-            const matchesCategoria = p.exercicio?.categoria?.nome.toLowerCase().includes(term);
 
-            if (!matchesPaciente && !matchesExercicio && !matchesCategoria) {
+            const matchesExercicios = p.exercicios?.some((ex) => {
+                const matchesNome = ex.nome.toLowerCase().includes(term);
+                const matchesCategoria = ex.categoria?.nome?.toLowerCase().includes(term);
+                return matchesNome || matchesCategoria;
+            });
+
+            if (!matchesPaciente && !matchesExercicios) {
                 return false;
             }
         }
@@ -103,9 +106,10 @@ const toggleRealizada = (prescricao) => {
 };
 
 const deletePrescricao = async (prescricao) => {
+    const qtdExercicios = prescricao.exercicios?.length || 0;
     const { isConfirmed } = await confirmAction({
         title: 'Remover prescrição?',
-        text: `A prescrição do exercício "${prescricao.exercicio?.nome}" para ${prescricao.paciente?.nome} será removida.`,
+        text: `A prescrição com ${qtdExercicios} exercício(s) para ${prescricao.paciente?.nome} será removida.`,
         confirmButtonText: 'Sim, excluir',
     });
 
@@ -229,7 +233,7 @@ const formatDate = (dateString) => {
                         <thead class="bg-gray-50 text-xs font-semibold uppercase tracking-wider text-gray-500">
                             <tr>
                                 <th class="px-6 py-4">Paciente</th>
-                                <th class="px-6 py-4">Exercício Prescrito</th>
+                                <th class="px-6 py-4">Exercícios Prescritos</th>
                                 <th class="px-6 py-4">Vigência do Plano</th>
                                 <th class="px-6 py-4">Frequência</th>
                                 <th class="px-6 py-4 text-center">Execução Hoje</th>
@@ -268,16 +272,27 @@ const formatDate = (dateString) => {
                                     </div>
                                 </td>
 
-                                <td class="px-6 py-4">
-                                    <div class="font-medium text-gray-900">
-                                        {{ p.exercicio?.nome }}
+                                <td class="px-6 py-4 max-w-xs">
+                                    <div v-if="p.exercicios && p.exercicios.length > 0" class="space-y-1.5">
+                                        <div class="flex items-center gap-1.5 text-xs text-gray-500 font-medium">
+                                            <SparklesIcon class="h-4 w-4 text-blue-600 shrink-0" />
+                                            <span><strong>{{ p.exercicios.length }}</strong> exercício(s) no plano</span>
+                                        </div>
+
+                                        <div class="flex flex-wrap gap-1">
+                                            <span
+                                                v-for="ex in p.exercicios"
+                                                :key="ex.id"
+                                                class="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-700 border border-slate-200"
+                                            >
+                                                <span>{{ ex.nome }}</span>
+                                                <span v-if="ex.categoria" class="text-[10px] text-indigo-600 font-bold">
+                                                    ({{ ex.categoria.nome }})
+                                                </span>
+                                            </span>
+                                        </div>
                                     </div>
-                                    <div v-if="p.exercicio?.categoria" class="mt-0.5">
-                                        <span class="inline-flex items-center gap-1 rounded-md bg-indigo-50 px-2 py-0.5 text-[11px] font-semibold text-indigo-700 border border-indigo-100">
-                                            <TagIcon class="h-3 w-3" />
-                                            {{ p.exercicio.categoria.nome }}
-                                        </span>
-                                    </div>
+                                    <span v-else class="text-xs text-gray-400 italic">Nenhum exercício vinculado</span>
                                 </td>
 
                                 <td class="px-6 py-4">

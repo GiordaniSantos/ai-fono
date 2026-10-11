@@ -26,8 +26,8 @@ class ExecucaoPrescricaoController extends Controller
         ->with([
             'paciente:id,nome',
             'paciente.media',
-            'prescricao.exercicio:id,nome,categoria_id',
-            'prescricao.exercicio.categoria:id,nome',
+            'prescricao.exercicios:id,nome,categoria_id',
+            'prescricao.exercicios.categoria:id,nome',
             'media',
         ]);
 

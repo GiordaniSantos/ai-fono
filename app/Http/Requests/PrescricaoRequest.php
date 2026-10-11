@@ -23,8 +23,8 @@ class PrescricaoRequest extends FormRequest
                 'integer',
                 Rule::exists('pacientes', 'id')->where('fonoaudiologo_id', $fonoId),
             ],
-            'exercicio_id' => [
-                'required',
+            'exercicios' => ['required', 'array', 'min:1'],
+            'exercicios.*' => [
                 'integer',
                 Rule::exists('exercicios', 'id')->where(function ($query) use ($fonoId) {
                     $query->where('fonoaudiologo_id', $fonoId);

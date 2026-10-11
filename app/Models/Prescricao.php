@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
@@ -17,7 +18,6 @@ class Prescricao extends AbstractBaseModel
     protected $fillable = [
         'fonoaudiologo_id',
         'paciente_id',
-        'exercicio_id',
         'data_inicio',
         'data_fim',
         'frequencia_diaria',
@@ -90,8 +90,8 @@ class Prescricao extends AbstractBaseModel
         return $this->belongsTo(Paciente::class, 'paciente_id');
     }
 
-    public function exercicio(): BelongsTo
+    public function exercicios(): BelongsToMany
     {
-        return $this->belongsTo(Exercicio::class, 'exercicio_id');
+        return $this->belongsToMany(Exercicio::class, 'exercicio_prescricao', 'prescricao_id', 'exercicio_id')->withTimestamps();
     }
 }

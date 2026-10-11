@@ -115,11 +115,15 @@ const filteredExecucoes = computed(() => {
 
         if (search.value) {
             const term = search.value.toLowerCase();
-            const matchesPaciente = execucao.paciente?.nome.toLowerCase().includes(term);
-            const matchesExercicio = execucao.prescricao?.exercicio?.nome.toLowerCase().includes(term);
-            const matchesCategoria = execucao.prescricao?.exercicio?.categoria?.nome.toLowerCase().includes(term);
+            const matchesPaciente = execucao.paciente?.nome?.toLowerCase().includes(term);
 
-            if (!matchesPaciente && !matchesExercicio && !matchesCategoria) {
+            const matchesExercicios = execucao.prescricao?.exercicios?.some((ex) => {
+                const matchesNome = ex.nome?.toLowerCase().includes(term);
+                const matchesCategoria = ex.categoria?.nome?.toLowerCase().includes(term);
+                return matchesNome || matchesCategoria;
+            });
+
+            if (!matchesPaciente && !matchesExercicios) {
                 return false;
             }
         }
@@ -373,7 +377,7 @@ const getSatisfacaoLabel = (nivel) => {
                             <tr>
                                 <th class="px-6 py-4">Data do Treino</th>
                                 <th class="px-6 py-4">Paciente</th>
-                                <th class="px-6 py-4">Exercício Praticado</th>
+                                <th class="px-6 py-4">Exercícios Prescritos</th>
                                 <th class="px-6 py-4">Gravação</th>
                                 <th class="px-6 py-4 text-center">Percepção</th>
                                 <th class="px-6 py-4">Feedback Clínico</th>
@@ -382,7 +386,6 @@ const getSatisfacaoLabel = (nivel) => {
                         </thead>
                         <tbody class="divide-y divide-gray-100 bg-white">
                             <tr v-for="e in filteredExecucoes" :key="e.id" class="hover:bg-gray-50/80 transition">
-                                <!-- Data -->
                                 <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
                                     <div class="flex items-center gap-1.5 text-xs text-gray-700 font-semibold">
                                         <CalendarIcon class="h-4 w-4 text-gray-400" />
@@ -410,16 +413,20 @@ const getSatisfacaoLabel = (nivel) => {
                                     </div>
                                 </td>
 
-                                <td class="px-6 py-4">
-                                    <div class="font-medium text-gray-900 truncate max-w-xs">
-                                        {{ e.prescricao?.exercicio?.nome }}
-                                    </div>
-                                    <div v-if="e.prescricao?.exercicio?.categoria" class="mt-0.5">
-                                        <span class="inline-flex items-center gap-1 rounded-md bg-indigo-50 px-2 py-0.5 text-[11px] font-semibold text-indigo-700 border border-indigo-100">
-                                            <TagIcon class="h-3 w-3" />
-                                            {{ e.prescricao.exercicio.categoria.nome }}
+                                <td class="px-6 py-4 max-w-xs">
+                                    <div v-if="e.prescricao?.exercicios && e.prescricao.exercicios.length > 0" class="flex flex-wrap gap-1">
+                                        <span
+                                            v-for="ex in e.prescricao.exercicios"
+                                            :key="ex.id"
+                                            class="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-700 border border-slate-200"
+                                        >
+                                            <span>{{ ex.nome }}</span>
+                                            <span v-if="ex.categoria" class="text-[10px] text-indigo-600 font-bold">
+                                                ({{ ex.categoria.nome }})
+                                            </span>
                                         </span>
                                     </div>
+                                    <span v-else class="text-xs text-gray-400 italic">Sem exercícios vinculados</span>
                                 </td>
 
                                 <td class="px-6 py-4 whitespace-nowrap">
@@ -536,10 +543,10 @@ const getSatisfacaoLabel = (nivel) => {
                                 </button>
                             </div>
 
-                            <div class="rounded-xl border border-gray-100 bg-gray-50/80 p-3.5 space-y-1.5 text-xs">
+                            <div class="rounded-xl border border-gray-100 bg-gray-50/80 p-3.5 space-y-2 text-xs">
                                 <div class="flex items-center justify-between">
                                     <span class="font-bold text-gray-900 text-sm">
-                                        {{ selectedExecucao?.prescricao?.exercicio?.nome }}
+                                        Exercício(s) Prescrito(s)
                                     </span>
                                     <span
                                         class="inline-flex items-center gap-1 rounded-md border px-2 py-0.5 font-semibold"
@@ -548,9 +555,19 @@ const getSatisfacaoLabel = (nivel) => {
                                         Autoavaliação: {{ getSatisfacaoLabel(selectedExecucao?.nivel_satisfacao).text }}
                                     </span>
                                 </div>
-                                <p v-if="selectedExecucao?.prescricao?.exercicio?.categoria" class="text-gray-500">
-                                    Categoria: {{ selectedExecucao.prescricao.exercicio.categoria.nome }}
-                                </p>
+
+                                <div v-if="selectedExecucao?.prescricao?.exercicios?.length" class="flex flex-wrap gap-1.5 pt-1">
+                                    <span
+                                        v-for="ex in selectedExecucao.prescricao.exercicios"
+                                        :key="ex.id"
+                                        class="inline-flex items-center gap-1 rounded-lg bg-white px-2.5 py-1 text-xs font-semibold text-gray-800 border border-gray-200 shadow-2xs"
+                                    >
+                                        <span>{{ ex.nome }}</span>
+                                        <span v-if="ex.categoria" class="text-[10px] text-indigo-600 font-bold">
+                                            ({{ ex.categoria.nome }})
+                                        </span>
+                                    </span>
+                                </div>
                             </div>
 
                             <div v-if="selectedExecucao?.arquivo_url" class="space-y-2">

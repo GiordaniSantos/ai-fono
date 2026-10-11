@@ -26,13 +26,9 @@ class PrescricaoController extends Controller
         ]);
     }
 
-    public function create(Request $request): Response
+    public function create(): Response
     {
-        $formData = $this->prescricaoService->getFormData();
-        $formData['selected_paciente_id']  = $request->query('paciente_id', '');
-        $formData['selected_exercicio_id'] = $request->query('exercicio_id', '');
-
-        return Inertia::render('Prescricoes/Create', $formData);
+        return Inertia::render('Prescricoes/Create', $this->prescricaoService->getFormData());
     }
 
     public function store(PrescricaoRequest $request): RedirectResponse
@@ -43,7 +39,7 @@ class PrescricaoController extends Controller
 
         $this->prescricaoService->create($data);
 
-        return redirect()->route('prescricoes.index')->with('success', 'Exercício prescrito com sucesso!');
+        return redirect()->route('prescricoes.index')->with('success', 'Prescrição criada com sucesso!');
     }
 
     public function edit(Prescricao $prescricao): Response
