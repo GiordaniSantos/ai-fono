@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\ExecucaoPrescricao;
+use App\Models\ExecucaoExercicio;
 use App\Models\Exercicio;
 use App\Models\Paciente;
 use App\Models\Prescricao;
@@ -31,9 +31,14 @@ class DashboardService
         $pacientesAtivos = Paciente::where('fonoaudiologo_id', $fonoId)->count();
         $exerciciosCadastrados = Exercicio::where('fonoaudiologo_id', $fonoId)->count();
         
-        $prescricoesAtivas = Prescricao::whereHas('paciente', fn($q) => $q->where('fonoaudiologo_id', $fonoId))->whereDate('data_fim', '>=', now())->count();
+        $prescricoesAtivas = Prescricao::whereHas('paciente', fn($q) => $q->where('fonoaudiologo_id', $fonoId))
+            ->whereDate('data_fim', '>=', now())
+            ->count();
 
-        $pacientesComTreino = ExecucaoPrescricao::whereHas('paciente', fn($q) => $q->where('fonoaudiologo_id', $fonoId))->where('data_execucao', '>=', now()->subDays(7))->distinct('paciente_id')->count('paciente_id');
+        $pacientesComTreino = ExecucaoExercicio::whereHas('paciente', fn($q) => $q->where('fonoaudiologo_id', $fonoId))
+            ->where('data_execucao', '>=', now()->subDays(7))
+            ->distinct('paciente_id')
+            ->count('paciente_id');
 
         $taxaAdesao = $pacientesAtivos > 0 ? round(($pacientesComTreino / $pacientesAtivos) * 100) : 0;
 
@@ -77,14 +82,17 @@ class DashboardService
     {
         $weekly = [];
 
-        $expectedDaily = Prescricao::whereHas('paciente', fn($q) => $q->where('fonoaudiologo_id', $fonoId))->whereDate('data_inicio', '<=', now())->whereDate('data_fim', '>=', now())->count();
+        $expectedDaily = Prescricao::whereHas('paciente', fn($q) => $q->where('fonoaudiologo_id', $fonoId))
+            ->whereDate('data_inicio', '<=', now())
+            ->whereDate('data_fim', '>=', now())
+            ->count();
             
         $expectedDaily = $expectedDaily > 0 ? $expectedDaily : 1;
 
         for ($i = 6; $i >= 0; $i--) {
             $date = now()->subDays($i);
             
-            $done = ExecucaoPrescricao::whereHas('paciente', fn($q) => $q->where('fonoaudiologo_id', $fonoId))->whereDate('data_execucao', $date->toDateString())->count();
+            $done = ExecucaoExercicio::whereHas('paciente', fn($q) => $q->where('fonoaudiologo_id', $fonoId))->whereDate('data_execucao', $date->toDateString())->count();
 
             $pct = min(100, round(($done / $expectedDaily) * 100));
 
@@ -126,20 +134,20 @@ class DashboardService
 
     private function getRecentActivities(int $fonoId): array
     {
-        return ExecucaoPrescricao::with(['paciente', 'prescricao.exercicios'])
+        return ExecucaoExercicio::with(['paciente', 'exercicio'])
             ->whereHas('paciente', fn($q) => $q->where('fonoaudiologo_id', $fonoId))
             ->orderBy('data_execucao', 'desc')
+            ->orderBy('id', 'desc')
             ->limit(4)
             ->get()
             ->map(function ($exec) {
-                $exercicios = $exec->prescricao && $exec->prescricao->exercicios->isNotEmpty()? $exec->prescricao->exercicios->pluck('nome')->implode(', '): 'Treino Diário';
-
+                $nomeExercicio = $exec->exercicio?->nome ?? 'Exercício Diário';
                 $hasMedia = !empty($exec->arquivo_url);
                 
                 return [
                     'id' => $exec->id,
                     'paciente' => $exec->paciente->nome,
-                    'exercicio' => Str::limit($exercicios, 45),
+                    'exercicio' => Str::limit($nomeExercicio, 45),
                     'data' => Carbon::parse($exec->data_execucao)->locale('pt-BR')->diffForHumans(),
                     'status' => $hasMedia ? 'Com Gravação' : 'Concluído',
                     'statusColor' => $hasMedia ? 'text-purple-700 bg-purple-50 ring-purple-600/20' : 'text-emerald-700 bg-emerald-50 ring-emerald-600/20',

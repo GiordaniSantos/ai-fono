@@ -73,7 +73,7 @@ class Paciente extends AbstractBaseModel
 
     public function execucoes(): HasMany
     {
-        return $this->hasMany(ExecucaoPrescricao::class);
+        return $this->hasMany(ExecucaoExercicio::class);
     }
 
     public function prescricoes(): HasMany

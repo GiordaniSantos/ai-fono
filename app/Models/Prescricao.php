@@ -6,8 +6,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Prescricao extends AbstractBaseModel
 {
@@ -21,14 +19,12 @@ class Prescricao extends AbstractBaseModel
         'data_inicio',
         'data_fim',
         'frequencia_diaria',
-        'realizada',
     ];
 
     protected $casts = [
         'data_inicio' => 'date:Y-m-d',
         'data_fim'  => 'date:Y-m-d',
         'frequencia_diaria' => 'integer',
-        'realizada' => 'boolean',
     ];
 
     protected $appends = [
@@ -68,16 +64,6 @@ class Prescricao extends AbstractBaseModel
         }
 
         return 'vigente';
-    }
-
-    public function execucoes(): HasMany
-    {
-        return $this->hasMany(ExecucaoPrescricao::class, 'prescricao_id');
-    }
-
-    public function execucaoHoje(): HasOne
-    {
-        return $this->hasOne(ExecucaoPrescricao::class, 'prescricao_id')->whereDate('data_execucao', Carbon::today());
     }
 
     public function fonoaudiologo(): BelongsTo

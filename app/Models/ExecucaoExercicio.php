@@ -5,14 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class ExecucaoPrescricao extends AbstractBaseModel
+class ExecucaoExercicio extends AbstractBaseModel
 {
     use HasFactory;
-    protected $table = 'execucoes_prescricoes';
+    protected $table = 'execucoes_exercicios';
 
     protected $fillable = [
         'paciente_id',
-        'prescricao_id',
+        'exercicio_id',
         'data_execucao',
         'comentario_fono',
         'nivel_satisfacao',
@@ -68,8 +68,8 @@ class ExecucaoPrescricao extends AbstractBaseModel
         return $this->belongsTo(Paciente::class, 'paciente_id');
     }
 
-    public function prescricao(): BelongsTo
+    public function exercicio(): BelongsTo
     {
-        return $this->belongsTo(Prescricao::class, 'prescricao_id');
+        return $this->belongsTo(Exercicio::class, 'exercicio_id');
     }
 }

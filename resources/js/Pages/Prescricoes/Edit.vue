@@ -275,18 +275,6 @@ const submit = () => {
                         <InputError class="mt-2" :message="form.errors.frequencia_diaria" />
                     </div>
 
-                    <div class="flex items-center gap-3 pt-2">
-                        <input
-                            id="realizada"
-                            type="checkbox"
-                            v-model="form.realizada"
-                            class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                        />
-                        <label for="realizada" class="text-sm font-medium text-gray-700 cursor-pointer">
-                            Marcar como executada <strong>no dia de hoje</strong>
-                        </label>
-                    </div>
-
                     <div class="flex items-center justify-end gap-3 border-t border-gray-100 pt-6">
                         <Link
                             :href="route('prescricoes.index')"

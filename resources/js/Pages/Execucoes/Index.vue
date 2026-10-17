@@ -17,7 +17,6 @@ import {
     SparklesIcon,
     XMarkIcon,
     PaperAirplaneIcon,
-    TagIcon,
     MusicalNoteIcon,
     VideoCameraIcon,
     ArrowTopRightOnSquareIcon,
@@ -117,13 +116,11 @@ const filteredExecucoes = computed(() => {
             const term = search.value.toLowerCase();
             const matchesPaciente = execucao.paciente?.nome?.toLowerCase().includes(term);
 
-            const matchesExercicios = execucao.prescricao?.exercicios?.some((ex) => {
-                const matchesNome = ex.nome?.toLowerCase().includes(term);
-                const matchesCategoria = ex.categoria?.nome?.toLowerCase().includes(term);
-                return matchesNome || matchesCategoria;
-            });
+            const ex = execucao.exercicio;
+            const matchesNome = ex?.nome?.toLowerCase().includes(term);
+            const matchesCategoria = ex?.categoria?.nome?.toLowerCase().includes(term);
 
-            if (!matchesPaciente && !matchesExercicios) {
+            if (!matchesPaciente && !matchesNome && !matchesCategoria) {
                 return false;
             }
         }
@@ -377,7 +374,7 @@ const getSatisfacaoLabel = (nivel) => {
                             <tr>
                                 <th class="px-6 py-4">Data do Treino</th>
                                 <th class="px-6 py-4">Paciente</th>
-                                <th class="px-6 py-4">Exercícios Prescritos</th>
+                                <th class="px-6 py-4">Exercício Realizado</th>
                                 <th class="px-6 py-4">Gravação</th>
                                 <th class="px-6 py-4 text-center">Percepção</th>
                                 <th class="px-6 py-4">Feedback Clínico</th>
@@ -414,19 +411,15 @@ const getSatisfacaoLabel = (nivel) => {
                                 </td>
 
                                 <td class="px-6 py-4 max-w-xs">
-                                    <div v-if="e.prescricao?.exercicios && e.prescricao.exercicios.length > 0" class="flex flex-wrap gap-1">
-                                        <span
-                                            v-for="ex in e.prescricao.exercicios"
-                                            :key="ex.id"
-                                            class="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-700 border border-slate-200"
-                                        >
-                                            <span>{{ ex.nome }}</span>
-                                            <span v-if="ex.categoria" class="text-[10px] text-indigo-600 font-bold">
-                                                ({{ ex.categoria.nome }})
+                                    <div v-if="e.exercicio" class="flex flex-wrap gap-1">
+                                        <span class="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-700 border border-slate-200">
+                                            <span>{{ e.exercicio.nome }}</span>
+                                            <span v-if="e.exercicio.categoria" class="text-[10px] text-indigo-600 font-bold">
+                                                ({{ e.exercicio.categoria.nome }})
                                             </span>
                                         </span>
                                     </div>
-                                    <span v-else class="text-xs text-gray-400 italic">Sem exercícios vinculados</span>
+                                    <span v-else class="text-xs text-gray-400 italic">Exercício não encontrado</span>
                                 </td>
 
                                 <td class="px-6 py-4 whitespace-nowrap">
@@ -546,7 +539,7 @@ const getSatisfacaoLabel = (nivel) => {
                             <div class="rounded-xl border border-gray-100 bg-gray-50/80 p-3.5 space-y-2 text-xs">
                                 <div class="flex items-center justify-between">
                                     <span class="font-bold text-gray-900 text-sm">
-                                        Exercício(s) Prescrito(s)
+                                        Exercício Executado
                                     </span>
                                     <span
                                         class="inline-flex items-center gap-1 rounded-md border px-2 py-0.5 font-semibold"
@@ -556,15 +549,11 @@ const getSatisfacaoLabel = (nivel) => {
                                     </span>
                                 </div>
 
-                                <div v-if="selectedExecucao?.prescricao?.exercicios?.length" class="flex flex-wrap gap-1.5 pt-1">
-                                    <span
-                                        v-for="ex in selectedExecucao.prescricao.exercicios"
-                                        :key="ex.id"
-                                        class="inline-flex items-center gap-1 rounded-lg bg-white px-2.5 py-1 text-xs font-semibold text-gray-800 border border-gray-200 shadow-2xs"
-                                    >
-                                        <span>{{ ex.nome }}</span>
-                                        <span v-if="ex.categoria" class="text-[10px] text-indigo-600 font-bold">
-                                            ({{ ex.categoria.nome }})
+                                <div v-if="selectedExecucao?.exercicio" class="flex flex-wrap gap-1.5 pt-1">
+                                    <span class="inline-flex items-center gap-1 rounded-lg bg-white px-2.5 py-1 text-xs font-semibold text-gray-800 border border-gray-200 shadow-2xs">
+                                        <span>{{ selectedExecucao.exercicio.nome }}</span>
+                                        <span v-if="selectedExecucao.exercicio.categoria" class="text-[10px] text-indigo-600 font-bold">
+                                            ({{ selectedExecucao.exercicio.categoria.nome }})
                                         </span>
                                     </span>
                                 </div>

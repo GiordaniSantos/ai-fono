@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ExecucaoPrescricao;
+use App\Models\ExecucaoExercicio;
 use App\Models\Paciente;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
 
-class ExecucaoPrescricaoController extends Controller
+class ExecucaoExercicioController extends Controller
 {
     public function index(Request $request): Response
     {
@@ -20,14 +20,14 @@ class ExecucaoPrescricaoController extends Controller
         $dataInicio = $request->query('data_inicio');
         $dataFim = $request->query('data_fim');
 
-        $query = ExecucaoPrescricao::whereHas('paciente', function ($q) use ($fonoId) {
+        $query = ExecucaoExercicio::whereHas('paciente', function ($q) use ($fonoId) {
             $q->where('fonoaudiologo_id', $fonoId);
         })
         ->with([
             'paciente:id,nome',
             'paciente.media',
-            'prescricao.exercicios:id,nome,categoria_id',
-            'prescricao.exercicios.categoria:id,nome',
+            'exercicio:id,nome,categoria_id',
+            'exercicio.categoria:id,nome',
             'media',
         ]);
 
@@ -61,7 +61,7 @@ class ExecucaoPrescricaoController extends Controller
         ]);
     }
 
-    public function updateComentario(Request $request, ExecucaoPrescricao $execucao): RedirectResponse
+    public function updateComentario(Request $request, ExecucaoExercicio $execucao): RedirectResponse
     {
         $this->authorizeAccess($execucao);
 
@@ -113,7 +113,7 @@ class ExecucaoPrescricaoController extends Controller
         ];
     }
 
-    private function authorizeAccess(ExecucaoPrescricao $execucao): void
+    private function authorizeAccess(ExecucaoExercicio $execucao): void
     {
         if ((int) $execucao->paciente?->fonoaudiologo_id !== (int) Auth::id()) {
             abort(403);

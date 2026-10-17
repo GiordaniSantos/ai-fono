@@ -33,7 +33,6 @@ class PrescricaoRequest extends FormRequest
             'data_inicio' => ['required', 'date'],
             'data_fim' => ['required', 'date', 'after_or_equal:data_inicio'],
             'frequencia_diaria' => ['required', 'integer', 'min:1', 'max:20'],
-            'realizada'   => ['nullable', 'boolean'],
         ];
     }
 

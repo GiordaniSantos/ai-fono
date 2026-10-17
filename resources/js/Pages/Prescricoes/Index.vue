@@ -35,7 +35,6 @@ const props = defineProps({
 
 const search = ref('');
 const vigenciaFilter = ref('vigentes');
-const execucaoFilter = ref('all');
 const pacienteFilter = ref('all');
 const activeModalImage = ref(null);
 
@@ -54,9 +53,6 @@ const filteredPrescricoes = computed(() => {
         if (vigenciaFilter.value === 'vigentes' && p.status_vigencia !== 'vigente') return false;
         if (vigenciaFilter.value === 'futuras' && p.status_vigencia !== 'futura') return false;
         if (vigenciaFilter.value === 'expiradas' && p.status_vigencia !== 'expirada') return false;
-
-        if (execucaoFilter.value === 'feitas' && !p.realizada) return false;
-        if (execucaoFilter.value === 'pendentes' && p.realizada) return false;
 
         if (pacienteFilter.value !== 'all' && String(p.paciente_id) !== String(pacienteFilter.value)) {
             return false;
@@ -85,7 +81,6 @@ const hasActiveFilters = computed(() => {
     return (
         search.value !== '' ||
         vigenciaFilter.value !== 'vigentes' ||
-        execucaoFilter.value !== 'all' ||
         pacienteFilter.value !== 'all'
     );
 });
@@ -93,16 +88,7 @@ const hasActiveFilters = computed(() => {
 const clearFilters = () => {
     search.value = '';
     vigenciaFilter.value = 'vigentes';
-    execucaoFilter.value = 'all';
     pacienteFilter.value = 'all';
-};
-
-const toggleRealizada = (prescricao) => {
-    router.patch(
-        route('prescricoes.toggle-realizada', prescricao.id),
-        {},
-        { preserveScroll: true }
-    );
 };
 
 const deletePrescricao = async (prescricao) => {
@@ -175,17 +161,6 @@ const formatDate = (dateString) => {
                         </select>
                     </div>
 
-                    <div class="relative w-full sm:w-44">
-                        <select
-                            v-model="execucaoFilter"
-                            class="block w-full rounded-xl border border-gray-300 bg-white py-2.5 px-3 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                        >
-                            <option value="all">Status de Hoje: Todos</option>
-                            <option value="feitas">Feitas Hoje</option>
-                            <option value="pendentes">Pendentes Hoje</option>
-                        </select>
-                    </div>
-
                     <div class="relative w-full sm:w-48">
                         <select
                             v-model="pacienteFilter"
@@ -236,7 +211,6 @@ const formatDate = (dateString) => {
                                 <th class="px-6 py-4">Exercícios Prescritos</th>
                                 <th class="px-6 py-4">Vigência do Plano</th>
                                 <th class="px-6 py-4">Frequência</th>
-                                <th class="px-6 py-4 text-center">Execução Hoje</th>
                                 <th class="px-6 py-4 text-right">Ações</th>
                             </tr>
                         </thead>
@@ -332,24 +306,6 @@ const formatDate = (dateString) => {
                                         <ClockIcon class="h-3.5 w-3.5" />
                                         {{ p.frequencia_diaria }}x ao dia
                                     </span>
-                                </td>
-
-                                <td class="px-6 py-4 text-center">
-                                    <button
-                                        type="button"
-                                        @click="toggleRealizada(p)"
-                                        class="inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-semibold shadow-sm transition"
-                                        :class="[
-                                            p.realizada
-                                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-300 hover:bg-emerald-100'
-                                                : 'bg-slate-100 text-slate-600 border border-slate-200 hover:bg-slate-200'
-                                        ]"
-                                        title="Clique para alternar o status de hoje"
-                                    >
-                                        <CheckCircleSolid v-if="p.realizada" class="h-4 w-4 text-emerald-600" />
-                                        <XCircleIcon v-else class="h-4 w-4 text-slate-400" />
-                                        {{ p.realizada ? 'Feito Hoje' : 'Pendente Hoje' }}
-                                    </button>
                                 </td>
 
                                 <td class="px-6 py-4 text-right">

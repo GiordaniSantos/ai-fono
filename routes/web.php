@@ -1,7 +1,8 @@
 <?php
 
 use App\Http\Controllers\CategoriaController;
-use App\Http\Controllers\ExecucaoPrescricaoController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ExecucaoExercicioController;
 use App\Http\Controllers\ExercicioController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PacienteController;
@@ -32,13 +33,14 @@ Route::middleware('auth')->group(function () {
     Route::post('/exercicios/gerar-ia', [ExercicioController::class, 'gerarDescricaoIa'])->name('exercicios.gerar-ia');
     Route::resource('exercicios', ExercicioController::class);
 
-    Route::patch('/prescricoes/{prescricao}/toggle-realizada', [PrescricaoController::class, 'toggleRealizada'])->name('prescricoes.toggle-realizada');
     Route::resource('prescricoes', PrescricaoController::class)->parameters([
         'prescricoes' => 'prescricao',
     ]);
 
-    Route::get('/execucoes', [ExecucaoPrescricaoController::class, 'index'])->name('execucoes.index');
-    Route::patch('/execucoes/{execucao}/comentario', [ExecucaoPrescricaoController::class, 'updateComentario'])->name('execucoes.comentario');
+    Route::get('/execucoes', [ExecucaoExercicioController::class, 'index'])->name('execucoes.index');
+    Route::patch('/execucoes/{execucao}/comentario', [ExecucaoExercicioController::class, 'updateComentario'])->name('execucoes.comentario');
 });
+
+Route::get('/dashboard2', fn () => Inertia::render('Dashboard2'))->name('dashboard2');
 
 require __DIR__.'/auth.php';
