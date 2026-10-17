@@ -110,24 +110,6 @@ const submit = () => {
                     Cadastre-se
                 </Link>
             </div>
-            
-            <!--<div class="mt-4 grid grid-cols-2 gap-4">
-                <a href="#" class="flex items-center justify-center gap-2 rounded-full border border-gray-700 bg-transparent py-2.5 text-sm font-semibold text-white hover:bg-gray-800 transition">
-                    <img src="/path/to/google-icon.svg" alt="Google" class="h-5 w-5" />
-                    Google
-                </a>
-                <a href="#" class="flex items-center justify-center gap-2 rounded-full border border-gray-700 bg-transparent py-2.5 text-sm font-semibold text-white hover:bg-gray-800 transition">
-                    <svg class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
-                    </svg>
-                    Código Paciente
-                </a>
-            </div>-->
-
-            <div class="mt-8 text-center text-xs text-white/50 px-4">
-                Ao continuar, você concorda com os Termos e Condições.
-            </div>
-
         </form>
     </GuestLayout>
 </template>

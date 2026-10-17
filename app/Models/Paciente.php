@@ -71,6 +71,16 @@ class Paciente extends AbstractBaseModel
         return $this->getFirstMediaUrl(self::COLLECTION_ANEXO) ?: null;
     }
 
+    public function execucoes(): HasMany
+    {
+        return $this->hasMany(ExecucaoPrescricao::class);
+    }
+
+    public function prescricoes(): HasMany
+    {
+        return $this->hasMany(Prescricao::class);
+    }
+
     public function exercicios(): HasMany
     {
         return $this->hasMany(Exercicio::class);
