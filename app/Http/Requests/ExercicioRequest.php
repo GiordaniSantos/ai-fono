@@ -22,6 +22,10 @@ class ExercicioRequest extends FormRequest
             'categoria_id' => ['nullable', 'exists:categorias,id'],
             'nome' => ['required', 'string', 'max:255'],
             'descricao' => ['nullable', 'string'],
+            'arquivos' => ['nullable', 'array'],
+            'arquivos.*' => ['file', 'max:51200'],
+            'remover_midias' => ['nullable', 'array'],
+            'remover_midias.*' => ['integer'],
         ];
     }
 

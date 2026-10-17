@@ -25,6 +25,11 @@ import {
     ChatBubbleBottomCenterTextIcon,
     BookOpenIcon,
     ListBulletIcon,
+    PaperClipIcon,
+    PhotoIcon,
+    VideoCameraIcon,
+    MusicalNoteIcon,
+    TrashIcon,
 } from '@heroicons/vue/24/outline';
 
 const props = defineProps({
@@ -47,7 +52,41 @@ const form = useForm({
     categoria_id: '',
     paciente_id: props.selected_paciente_id || '',
     descricao: '',
+    arquivos: [],
 });
+
+const mediaPreviews = ref([]);
+
+const handleFileUpload = (event) => {
+    const files = Array.from(event.target.files || []);
+
+    files.forEach((file) => {
+        form.arquivos.push(file);
+
+        const localUrl = URL.createObjectURL(file);
+        const mime = file.type;
+
+        mediaPreviews.value.push({
+            name: file.name,
+            size: (file.size / (1024 * 1024)).toFixed(2) + ' MB',
+            url: localUrl,
+            isImage: mime.startsWith('image/'),
+            isVideo: mime.startsWith('video/'),
+            isAudio: mime.startsWith('audio/'),
+            isDoc: !mime.startsWith('image/') && !mime.startsWith('video/') && !mime.startsWith('audio/'),
+        });
+    });
+
+    event.target.value = '';
+};
+
+const removerArquivo = (index) => {
+    if (mediaPreviews.value[index]?.url) {
+        URL.revokeObjectURL(mediaPreviews.value[index].url);
+    }
+    form.arquivos.splice(index, 1);
+    mediaPreviews.value.splice(index, 1);
+};
 
 const tiposConteudo = [
     { id: 'frases', label: 'Frases', icon: ChatBubbleBottomCenterTextIcon },
@@ -175,7 +214,9 @@ const aceitarSugestao = () => {
 };
 
 const submit = () => {
-    form.post(route('exercicios.store'));
+    form.post(route('exercicios.store'), {
+        forceFormData: true,
+    });
 };
 </script>
 
@@ -195,10 +236,9 @@ const submit = () => {
             </div>
         </template>
 
-        <div class="">
+        <div>
             <div class="rounded-2xl border border-gray-200 bg-white p-6 sm:p-8 shadow-sm">
                 <form @submit.prevent="submit" class="space-y-6">
-                    <!-- Nome do Exercício -->
                     <div>
                         <InputLabel for="nome" value="Nome do Exercício *" />
                         <TextInput
@@ -251,6 +291,91 @@ const submit = () => {
                             </select>
                             <InputError class="mt-2" :message="form.errors.paciente_id" />
                         </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <InputLabel value="Anexo de Mídias e Materiais Demonstrativos (Opcional)" />
+
+                        <div class="flex items-center justify-center w-full">
+                            <label
+                                class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-2xl cursor-pointer bg-slate-50/50 hover:bg-slate-100/80 border-slate-300 transition group"
+                            >
+                                <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                                    <div class="flex items-center gap-2 mb-2 text-slate-400 group-hover:text-blue-600 transition">
+                                        <PhotoIcon class="h-6 w-6" />
+                                        <VideoCameraIcon class="h-6 w-6" />
+                                        <MusicalNoteIcon class="h-6 w-6" />
+                                        <PaperClipIcon class="h-6 w-6" />
+                                    </div>
+                                    <p class="text-sm font-semibold text-slate-700">
+                                        Clique para selecionar mídias <span class="text-xs text-slate-400 font-normal">(sem limite)</span>
+                                    </p>
+                                    <p class="text-xs text-slate-500 mt-0.5">
+                                        Imagens (PNG, JPG), Vídeos (MP4), Áudios (MP3, WAV) ou Documentos (PDF)
+                                    </p>
+                                </div>
+                                <input
+                                    type="file"
+                                    multiple
+                                    class="hidden"
+                                    accept="image/*,video/*,audio/*,application/pdf"
+                                    @change="handleFileUpload"
+                                />
+                            </label>
+                        </div>
+
+                        <div v-if="mediaPreviews.length > 0" class="space-y-2 pt-2">
+                            <span class="text-xs font-bold uppercase tracking-wider text-slate-600 block">
+                                Arquivos Anexados ({{ mediaPreviews.length }})
+                            </span>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-3 xl:grid-cols-6 gap-3">
+                                <div
+                                    v-for="(item, index) in mediaPreviews"
+                                    :key="index"
+                                    class="relative group rounded-xl border border-slate-200 bg-white p-2.5 shadow-2xs space-y-2 flex flex-col justify-between"
+                                >
+                                    <div v-if="item.isImage" class="relative rounded-lg overflow-hidden h-44 bg-slate-100 flex items-center justify-center">
+                                        <img :src="item.url" class="h-full w-full object-cover" />
+                                    </div>
+
+                                    <div v-else-if="item.isVideo" class="relative rounded-lg overflow-hidden h-44 bg-black flex items-center justify-center">
+                                        <video :src="item.url" controls class="max-h-44 w-full object-contain" />
+                                    </div>
+
+                                    <div v-else-if="item.isAudio" class="rounded-lg bg-teal-50 border border-teal-100 p-3 flex flex-col justify-center space-y-2">
+                                        <div class="flex items-center gap-2 text-teal-800 text-xs font-bold">
+                                            <MusicalNoteIcon class="h-5 w-5 text-teal-600 shrink-0" />
+                                            <span class="truncate">{{ item.name }}</span>
+                                        </div>
+                                        <audio :src="item.url" controls class="w-full h-8" />
+                                    </div>
+
+                                    <div v-else class="rounded-lg bg-slate-50 border border-slate-200 p-4 flex items-center gap-3">
+                                        <PaperClipIcon class="h-6 w-6 text-slate-500 shrink-0" />
+                                        <div class="truncate text-xs">
+                                            <p class="font-bold text-slate-800 truncate">{{ item.name }}</p>
+                                            <p class="text-slate-400 text-[10px]">{{ item.size }}</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex items-center justify-between pt-1 border-t border-slate-100 text-[11px] text-slate-500">
+                                        <span class="truncate max-w-[150px]" :title="item.name">{{ item.name }}</span>
+                                        <button
+                                            type="button"
+                                            @click="removerArquivo(index)"
+                                            class="inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-xs font-semibold text-red-600 hover:bg-red-50 transition"
+                                            title="Remover anexo"
+                                        >
+                                            <TrashIcon class="h-3.5 w-3.5" />
+                                            Remover
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <InputError class="mt-2" :message="form.errors.arquivos" />
                     </div>
 
                     <div>
@@ -348,8 +473,8 @@ const submit = () => {
                                 <UserIcon class="h-5 w-5 text-blue-600 shrink-0" />
                                 <div>
                                     <span class="font-bold">{{ pacienteAtual.nome }}</span>
-                                    <span v-if="modalPrompt.idade"> • {{ modalPrompt.idade }} anos</span>
-                                    <span v-if="modalPrompt.diagnostico"> • {{ modalPrompt.diagnostico }}</span>
+                                    <span v-if="modalPrompt.idade"> - {{ modalPrompt.idade }} anos</span>
+                                    <span v-if="modalPrompt.diagnostico"> - {{ modalPrompt.diagnostico }}</span>
                                 </div>
                             </div>
 
